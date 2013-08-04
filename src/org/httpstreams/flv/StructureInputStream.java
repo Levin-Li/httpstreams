@@ -37,15 +37,15 @@ public class StructureInputStream extends AutoCloseInputStream  {
 	public StructureInputStream(byte[] data) {
 		super(new ByteArrayInputStream(data));
 	}
-	
-	/**
-	 * 从输出流中截取指定长度的输入流
-	 * 
-	 * @param inStream
-	 * @param length
-	 * @return
-	 * @throws IOException
-	 */
+
+    /**
+     * 从输出流中截取指定长度的输入流
+     * 
+     * @param inStream
+     * @param length
+     * @return
+     * @throws IOException
+     */
 	public static StructureInputStream subInputStream (InputStream inStream, long length) throws IOException {
 		// 把需要读取的内容拷贝出来，
 		// 在对数据进行处理的时候，很可能出错，
