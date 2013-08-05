@@ -1,9 +1,8 @@
 package org.httpstreams.flv.decoder.tags.data.scripts;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.httpstreams.flv.FlvSupports;
@@ -17,7 +16,7 @@ import org.httpstreams.flv.decoder.tags.data.scripts.elements.ValueFactory;
 
 
 public class ScriptData implements TagData {
-    private List<Value> values = Collections.emptyList();
+    private List<Value> container = new LinkedList<Value>();
 
     /* (non-Javadoc)
      * @see org.httpstreams.flv.decoder.tags.data.TagData#read(org.httpstreams.flv.StructureInputStream, long)
@@ -27,11 +26,12 @@ public class ScriptData implements TagData {
         // 把脚本内容阶段,避免读取额外的数据
         StructureInputStream newInStream = StructureInputStream.subInputStream(inStream, length);
         
-        values = readObject(newInStream);
+        container.clear();
+        readObject(newInStream);
     }
     
     public boolean isMetaData () {
-        return isMetaData(values);
+        return isMetaData(container);
     }
 
     private boolean isMetaData (List<Value> values) {
@@ -52,7 +52,7 @@ public class ScriptData implements TagData {
             return position;
         }
         
-        ECMAArrayValue metadata = (ECMAArrayValue) values.get(1);
+        ECMAArrayValue metadata = (ECMAArrayValue) container.get(1);
         ScriptObject object = (ScriptObject) metadata.getProperty("keyframes");
         if(null == object) {
             return position;
@@ -83,36 +83,35 @@ public class ScriptData implements TagData {
         
         
     }
-    private List<Value> readObject(StructureInputStream newInStream) throws IOException {
+    private void readObject(StructureInputStream newInStream) throws IOException {
         
         // read objects
         int type;
-        List<Value> values = new ArrayList<Value>();  
         try {
             do {
                 // 预读取前三个字节，查看是否已经到包的末尾了
                 // 如果已经读到了文件末尾，则直接退出
                 int tag = newInStream.preReadUI24();
-                if (FlvSupports.SCRIPT_9_END == tag) {
+                if (-1 == tag) {
+                    break; // 已经到文件末尾了
+                } else if (FlvSupports.SCRIPT_9_END == tag) {
                     newInStream.skip(3);
                     break;
                 }
                 
                 type = newInStream.readUI8();
                 Value entry = ValueFactory.getEmptyValue(type).read(newInStream);
-                values.add(entry);
+                container.add(entry);
             } while (true);
         } catch (Exception e) {
             e.printStackTrace();
         }
       
-        
-        return values;
     }
 
     
     @Override
     public String toString() {
-        return values.toString();
+        return container.toString();
     }
 }
