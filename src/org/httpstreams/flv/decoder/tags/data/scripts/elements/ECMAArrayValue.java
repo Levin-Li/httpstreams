@@ -2,6 +2,7 @@ package org.httpstreams.flv.decoder.tags.data.scripts.elements;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.httpstreams.flv.FlvSupports;
@@ -13,8 +14,13 @@ public class ECMAArrayValue implements Value {
 
     @Override
     public Value read(StructureInputStream inStream) throws IOException {
+        // 数组估算个数
         long arrayLength = inStream.readUI32();
-        while (arrayLength > 0) {
+        items = arrayLength < 1024?new ArrayList<Entry>((int)arrayLength):new LinkedList<Entry>();
+
+        int listTerminator;
+        while ((listTerminator = inStream.preReadUI24()) != -1
+                && listTerminator != FlvSupports.SCRIPT_9_END) {
             // 属性名
             String name = readName(inStream);
 
@@ -25,6 +31,11 @@ public class ECMAArrayValue implements Value {
             arrayLength--;
         }
 
+        if (listTerminator == FlvSupports.SCRIPT_9_END ) {
+            inStream.skip(3);
+        }
+        
+        
         return this;
     }
 
@@ -64,6 +75,10 @@ public class ECMAArrayValue implements Value {
 
     @Override
     public String toString() {
-        return items.toString();
+        StringBuilder b = new StringBuilder(items.toString());
+        
+        b.setCharAt(0, '{');
+        b.setCharAt(b.length() -1, '}');
+        return b.toString();
     }
 }
