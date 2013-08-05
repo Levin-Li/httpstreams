@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.commons.io.EndianUtils;
-import org.apache.commons.io.input.AutoCloseInputStream;
+import org.apache.commons.io.input.ProxyInputStream;
 
 /**
  * 对 InputStream 进行增强，支持多字节到 int 类型的转换。
@@ -17,7 +17,7 @@ import org.apache.commons.io.input.AutoCloseInputStream;
  * @author chenxiuheng@gmail.com
  *
  */
-public class StructureInputStream extends AutoCloseInputStream  {
+public class StructureInputStream extends ProxyInputStream {
 
 	final private byte[] ui8 = new byte[1];
 	final private byte[] ui16 = new byte[2];
@@ -190,5 +190,9 @@ public class StructureInputStream extends AutoCloseInputStream  {
 		return ln - remained;
 	}
 
+    protected void finalize() throws Throwable {
+        close();
+        super.finalize();
+    }
 
 }
