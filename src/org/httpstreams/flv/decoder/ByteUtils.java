@@ -24,7 +24,22 @@ public class ByteUtils {
         return bytes;
     }
     
-    public static char toHex (byte n) {
-        return (char) (n < 10 ? (n + '0'):(n-10 + 'A'));
+    public static String toHex (byte n) {
+        char[] b = new char[2];
+        
+        int first = (n & 0xf0 ) >> 4 ;
+        int second = (n & 0xf );
+        
+        b[0] = (char) (first < 10 ? (first + '0'):(first-10 + 'A'));
+        b[1] = (char) (second < 10 ? (second + '0'):(second-10 + 'A'));
+        return String.valueOf(b);
+    }
+    
+    public static void main(String[] args) {
+        String str = "Hello my Name is Peter.";
+        
+        for (byte  b : str2bytes(str)) {
+            System.out.print(toHex(b) + " ");
+        }
     }
 }
