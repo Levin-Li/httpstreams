@@ -13,28 +13,26 @@ public class Entry implements Value {
     private String name;
     private Value value;
     
+    private boolean isNull = false;
+
     @Override
     public Value read(StructureInputStream inStream) throws IOException {
-        int strType = FlvSupports.SCRIPT_2_String;
-        Value strValue = ValueFactory.getEmptyValue(strType).read(inStream);
-        name = (String) strValue.getValue();
+        int strLength = inStream.readUI16();
+        byte[] bytes = new byte[strLength];
+        inStream.readActual(bytes);
+        name = new String(bytes);
+
+        int valueType = inStream.readUI8();
+        if (0 == strLength && valueType == FlvSupports.SCRIPT_9_END) {
+            // Entry 内容为： 00 9，表示已经到末尾了 
+            isNull = true;
+            return this;
+        }
+
         
-        int type = inStream.readUI8();
-        value =  ValueFactory.getEmptyValue(type).read(inStream);
-        
+        value =  ValueFactory.getEmptyValue(valueType).read(inStream);
         return this;
     }
-    
-    /**
-     * @param name
-     * @param value
-     */
-    public Entry(String name, Value value) {
-        super();
-        this.name = name;
-        this.value = value;
-    }
-    public Entry (){}
 
     public final String getName() {
         return name;
@@ -51,5 +49,13 @@ public class Entry implements Value {
         b.append(value);
 
         return b.toString();
+    }
+
+    /**
+     * 
+     * @see {@link #isNull isNull} 
+     **/
+    public final boolean isNull() {
+        return isNull;
     }
 }

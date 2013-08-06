@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.httpstreams.flv.FlvSupports;
 import org.httpstreams.flv.StructureInputStream;
 
 
@@ -19,14 +18,12 @@ public class ScriptObject implements Value {
     @Override
     public Value read(StructureInputStream inStream) throws IOException {
         do {
-            int nextTag = inStream.preReadUI24();
-            if (nextTag == FlvSupports.SCRIPT_9_END) {
-                inStream.skip(3);
-                break;
-            }
-            
             Entry entry = new Entry();
             entry.read(inStream);
+            if (entry.isNull()) {
+                break;
+            }
+
             values.add(entry);
         } while (true);
 

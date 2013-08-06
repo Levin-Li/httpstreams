@@ -18,23 +18,17 @@ public class ECMAArrayValue implements Value {
         long arrayLength = inStream.readUI32();
         items = arrayLength < 1024?new ArrayList<Entry>((int)arrayLength):new LinkedList<Entry>();
 
-        int listTerminator;
-        while ((listTerminator = inStream.preReadUI24()) != -1
-                && listTerminator != FlvSupports.SCRIPT_9_END) {
-            // 属性名
-            String name = readName(inStream);
-
-            // 属性值
-            Value value = readValue(inStream);
-
-            items.add(new Entry(name, value));
-            arrayLength--;
-        }
-
-        if (listTerminator == FlvSupports.SCRIPT_9_END ) {
-            inStream.skip(3);
-        }
         
+        do {
+            Entry entry = new Entry();  
+            entry.read(inStream);
+            
+            if (entry.isNull()) {
+                break;
+            } else {
+                items.add(entry);
+            }
+        } while (true);
         
         return this;
     }
