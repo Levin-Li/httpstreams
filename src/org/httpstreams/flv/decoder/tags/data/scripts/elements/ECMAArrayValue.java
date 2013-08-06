@@ -33,24 +33,6 @@ public class ECMAArrayValue implements Value {
         return this;
     }
 
-    /**
-     * 获取属性值
-     * 
-     * @param inStream
-     * @return
-     * @throws IOException
-     */
-    private String readName(StructureInputStream inStream) throws IOException {
-        int type = FlvSupports.SCRIPT_2_String;
-        Value name =  ValueFactory.getEmptyValue(type).read(inStream);
-
-        return (String) name.getValue();
-    }
-
-    private Value readValue(StructureInputStream inStream) throws IOException {
-        int type = inStream.readUI8();
-        return ValueFactory.getEmptyValue(type).read(inStream);
-    }
 
     public Value getProperty (String name) {
         for (Entry entry : items) {
