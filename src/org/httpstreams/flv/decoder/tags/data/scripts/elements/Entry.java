@@ -15,7 +15,6 @@ public class Entry implements Value {
     
     private boolean isNull = false;
 
-    @Override
     public Value read(StructureInputStream inStream) throws IOException {
         int strLength = inStream.readUI16();
         byte[] bytes = new byte[strLength];
