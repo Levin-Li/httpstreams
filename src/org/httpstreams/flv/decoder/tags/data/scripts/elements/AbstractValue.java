@@ -34,7 +34,6 @@ public abstract class AbstractValue implements Value {
 		this.type = type;
 	}
 	
-	@Override
 	public Value read(StructureInputStream inStream) throws IOException {
 		value = readTypedValue(inStream);
 		return this;
