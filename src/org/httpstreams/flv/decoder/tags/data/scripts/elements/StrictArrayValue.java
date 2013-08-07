@@ -10,10 +10,7 @@ import org.httpstreams.flv.StructureInputStream;
 
 public class StrictArrayValue implements Value {
 	private List<Value> items = new ArrayList<Value>();
-	
 
-
-    @Override
     public Value read(StructureInputStream inStream) throws IOException {
         long itemNumber = inStream.readUI32();
         while (itemNumber > 0) {
@@ -35,12 +32,10 @@ public class StrictArrayValue implements Value {
         return items.iterator();
     }
 
-    @Override
     public List<Value> getValue() {
         return items;
     }
 	
-    @Override
     public String toString() {
         return items.toString();
     }
