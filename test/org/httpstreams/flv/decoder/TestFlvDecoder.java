@@ -17,15 +17,15 @@ public class TestFlvDecoder {
     public static void main(String[] args) throws Exception {
         FlvTagIterator  tagIterator =null;
         FlvDecoder file = new FlvDecoder();
-        Flv flv = file.decode("test.flv");
+        Flv flv = file.decode("web/meta.flv");
         System.out.println(flv);
 
         tagIterator = flv.getTagIterator();
         listTags(tagIterator);
         
         
-        tagIterator = flv.seek(0.438);
-        listTags(tagIterator);
+     //   tagIterator = flv.seek(0.438);
+     //   listTags(tagIterator);
 
     
         
