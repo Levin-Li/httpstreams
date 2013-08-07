@@ -37,7 +37,7 @@ public class AudioData implements TagData {
      */
     private long dataSize;
     
-    @Override
+
     public void read(StructureInputStream inStream, long packetSize)
             throws IOException {
         int audioHead = inStream.read(); 
@@ -86,7 +86,7 @@ public class AudioData implements TagData {
             this.descript = descript;
         }
 
-        @Override
+    
         public String toString() {
             return descript;
         }
@@ -122,7 +122,7 @@ public class AudioData implements TagData {
             this.descript = descript;
         }
         
-        @Override
+    
         public String toString() {
             return descript;
         }
@@ -138,7 +138,7 @@ public class AudioData implements TagData {
         }
     }
     
-    @Override
+
     public String toString() {
         SoundFormat format = SoundFormat.findByCode(soundFormat);
         SoundRate rate = SoundRate.findByCode(soundRate);
