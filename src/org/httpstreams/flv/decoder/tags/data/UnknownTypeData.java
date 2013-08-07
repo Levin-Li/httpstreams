@@ -8,8 +8,6 @@ public class UnknownTypeData implements TagData {
 
     private int tagtype;
     
-    
-    @Override
     public void read(StructureInputStream inStream, long packetSize)
             throws IOException {
         inStream.skip(packetSize);
