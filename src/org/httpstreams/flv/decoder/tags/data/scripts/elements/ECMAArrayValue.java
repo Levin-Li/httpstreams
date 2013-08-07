@@ -1,6 +1,7 @@
 package org.httpstreams.flv.decoder.tags.data.scripts.elements;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,7 +12,6 @@ import org.httpstreams.flv.StructureInputStream;
 public class ECMAArrayValue implements Value {
     private List<Entry> items = new ArrayList<Entry>();
 
-    @Override
     public Value read(StructureInputStream inStream) throws IOException {
         // 数组估算个数
         long arrayLength = inStream.readUI32();
@@ -43,7 +43,6 @@ public class ECMAArrayValue implements Value {
         return null;
     }
     
-    @Override
     public Object getValue() {
         return items;
     }
@@ -55,5 +54,17 @@ public class ECMAArrayValue implements Value {
         b.setCharAt(0, '{');
         b.setCharAt(b.length() -1, '}');
         return b.toString();
+    }
+    
+    public double doubleValue() {
+        return 0;
+    }
+    
+    public long longValue() {
+        return 0;
+    }
+    
+    public Timestamp timestampValue() {
+        return null;
     }
 }
