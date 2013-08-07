@@ -1,6 +1,7 @@
 package org.httpstreams.flv.decoder;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 public interface Flv {
 
@@ -23,6 +24,6 @@ public interface Flv {
      */
     public FlvTagIterator getTagIterator() throws IOException;
     
-    public FlvTagIterator seek (double timestamp) throws IOException;
+    public InputStream seek (double timestamp) throws IOException;
 
 }

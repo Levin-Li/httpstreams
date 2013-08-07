@@ -62,32 +62,32 @@ public class FlvTagSupport implements FlvTag {
         this.header = header;
     }
 
-    @Override
+
     public long getDataSize() {
         return dataSize;
     }
 
-    @Override
+
     public Flv getFlv() {
         return header;
     }
 
-    @Override
+
     public int getStreamId() {
         return streamId;
     }
 
-    @Override
+
     public long getTagSize() {
         return dataSize + HEAD_SIZE;
     }
 
-    @Override
+
     public long getTimestamp() {
         return timestamp;
     }
 
-    @Override
+
     public FlvTag next(StructureInputStream inStream) {
         try {
             // 跳过上一个 Tag 的数据包
@@ -146,7 +146,7 @@ public class FlvTagSupport implements FlvTag {
         data = null;
     }
 
-    @Override
+
     public TagData getData() throws IOException {
         return data;
     }
@@ -163,12 +163,12 @@ public class FlvTagSupport implements FlvTag {
         return FlvTag.TAG_TYPE_AUDIO == type;
     }
     
-    @Override
+
     public boolean isOtherTypes() {
         return !isScript() && !isAudio() && !isVideo();
     }
     
-    @Override
+
     public String toString() {
         StringBuilder b = new StringBuilder();
         

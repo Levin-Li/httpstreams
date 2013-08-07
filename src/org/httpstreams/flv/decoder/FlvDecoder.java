@@ -1,6 +1,7 @@
 package org.httpstreams.flv.decoder;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
@@ -134,7 +135,6 @@ public class FlvDecoder {
             return dataOffset;
         }
 
-        @Override
         public FlvTagIterator getTagIterator() throws IOException {
             StructureInputStream inStream = new StructureInputStream(filename);
             this.decode(inStream);
@@ -144,34 +144,43 @@ public class FlvDecoder {
         
         /**
          * 跳转到指定时间戳上
-         * @param timestamp 毫秒级的时间戳
+         * @param timestamp 时间戳(秒)
          * @return
          * @throws IOException 
          */
-        public FlvTagIterator seek (double timestamp) throws IOException {
+        public InputStream seek (double timestamp) throws IOException {
+            FlvTagIterator itr = getTagIterator();
+            
+            long position = getPosition(timestamp);
+            itr.skip(position);
+            
+            return itr.getInputStream();
+        }
+        
+        private long getPosition (double timestamp) throws IOException {
             FlvTagIterator itr = getTagIterator();
             
             if (!itr.hasNext()) {
-                return null;
+                return 0;
             }
             
             FlvTag tag = itr.next();
             if (!tag.isScript()) {
-                return null;
+                return 0;
             }
             
             TagData data = tag.getData();
             ScriptData scriptData = (ScriptData)data;
             if (!scriptData.isMetaData()) {
-                return null;
+                return 0;
             }
             
             long position = scriptData.getFilePosition(timestamp);
             if (position != -1) {
-                itr.skip(position);
+                return position;
+            } else {
+                return -1;
             }
-            
-            return itr;
         }
     }
 

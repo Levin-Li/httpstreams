@@ -37,12 +37,10 @@ public class FlvTagIterator implements Iterator<FlvTag>, Closeable {
         }
     }
 
-    @Override
     public boolean hasNext() {
         return !inStream.isEnd();
     }
 
-    @Override
     public FlvTag next() {
         FlvTag tag = preTag.next(inStream);
         filePosition += tag.getTagSize();
@@ -51,13 +49,11 @@ public class FlvTagIterator implements Iterator<FlvTag>, Closeable {
         return tag;
     }
     
-    @Override
     public void remove() {
         throw new UnsupportedOperationException(
                 "unsupported method FlvTagIteroter#remove()");
 
     }
-    @Override
     public void close() throws IOException {
         inStream.close();
     }
@@ -69,5 +65,9 @@ public class FlvTagIterator implements Iterator<FlvTag>, Closeable {
 
     public final long getPreTagSize() {
         return preTagSize;
+    }
+
+    public final StructureInputStream getInputStream() {
+        return inStream;
     }
 }
