@@ -12,7 +12,6 @@ public class VideoData implements TagData {
 
     private long datasize;
 
-    @Override
     public void read(StructureInputStream inStream, long length)
             throws IOException {
         this.datasize = length;
