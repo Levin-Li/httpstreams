@@ -10,12 +10,10 @@ import org.httpstreams.flv.StructureInputStream;
 public class ScriptObject implements Value {
     private List<Entry> values = new ArrayList<Entry>();
 
-    @Override
     public Object getValue() {
         return values;
     }
 
-    @Override
     public Value read(StructureInputStream inStream) throws IOException {
         do {
             Entry entry = new Entry();
