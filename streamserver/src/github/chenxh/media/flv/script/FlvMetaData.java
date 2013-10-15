@@ -36,25 +36,23 @@ public class FlvMetaData implements ITagData {
         return getBoolean("hasKeyframes")
          && null != getEcmaArray("keyframes");
     }
-    
-    public int[] getFilepositions(){
+
+    public long[] getFilepositions(){
         if (hasKeyframes()) {
-            StrictArray positions = getEcmaArray("keyframes").getStrictArray("filepositions");
-            return positions.toIntArray();
+            return KeyFrames.getFilepositions(getEcmaArray("keyframes"));
         } else {
-            return ArrayUtils.EMPTY_INT_ARRAY;
+            return ArrayUtils.EMPTY_LONG_ARRAY;
         }
     }
 
     public double[] getTimes(){
         if (hasKeyframes()) {
-            StrictArray positions = getEcmaArray("keyframes").getStrictArray("times");
-            return positions.toDoubleArray();
+            return KeyFrames.getTimes(getEcmaArray("keyframes"));
         } else {
             return ArrayUtils.EMPTY_DOUBLE_ARRAY;
         }
     }
-    
+
     public boolean hasCuePoints() {
         return getBoolean("hasCuePoints")
         && null != getStrictArray("cuePoints");
@@ -176,14 +174,14 @@ public class FlvMetaData implements ITagData {
         b.append(" duration=").append(getDuration()).append("\r\n");
         
         // 关键帧索引
-        int[] filepositions = getFilepositions();
+        long[] filepositions = getFilepositions();
         double[] times = getTimes();
         b.append(" hasKeyframes=").append(hasKeyframes()).append("\r\n");
         b.append(" keyframes=").append("\r\n");
         for (int i = 0; i < filepositions.length && i < times.length; i++) {
             b.append("   [").append(filepositions[i]).append(",").append(times[i]).append("]\r\n");
         }
-        
+
         // 媒体信息提示点
         CuePoint[] cuePonits = getCuePoints();
         b.append(" hasCuePoints=").append(hasCuePoints()).append("\r\n");

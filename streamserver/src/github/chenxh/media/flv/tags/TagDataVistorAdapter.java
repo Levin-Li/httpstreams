@@ -3,8 +3,9 @@ package github.chenxh.media.flv.tags;
 import java.io.EOFException;
 import java.io.IOException;
 
+import github.chenxh.media.IDataTrunk;
 import github.chenxh.media.UnsignedDataInput;
-import github.chenxh.media.flv.ITag;
+import github.chenxh.media.flv.ITagTrunk;
 import github.chenxh.media.flv.ITagData;
 import github.chenxh.media.flv.ITagDataVistor;
 import github.chenxh.media.flv.ITagHead;
@@ -16,17 +17,17 @@ public class TagDataVistorAdapter  implements ITagDataVistor {
     }
 
     @Override
-    public ITagData readScriptData(ITagHead header, UnsignedDataInput inStream) throws IOException {
+    public ITagData readScriptData(IDataTrunk header, UnsignedDataInput inStream) throws IOException {
         return skipDatas(header, inStream);
     }
 
     @Override
-    public ITagData readAudioData(ITagHead header, UnsignedDataInput inStream) throws IOException {
+    public ITagData readAudioData(IDataTrunk header, UnsignedDataInput inStream) throws IOException {
         return skipDatas(header, inStream);
     }
 
     @Override
-    public ITagData readOtherData(ITagHead header, UnsignedDataInput inStream) throws IOException {
+    public ITagData readOtherData(IDataTrunk header, UnsignedDataInput inStream) throws IOException {
         return skipDatas(header, inStream);
     }
 
@@ -43,13 +44,13 @@ public class TagDataVistorAdapter  implements ITagDataVistor {
      * @return
      * @throws IOException
      */
-    private ITagData skipDatas(ITagHead header, UnsignedDataInput inStream) throws IOException {
-        inStream.skipBytes(header.getBodySize());
+    private ITagData skipDatas(IDataTrunk header, UnsignedDataInput inStream) throws IOException {
+        inStream.skipBytes(header.getDataSize());
         return null;
     }
 
     @Override
-    public boolean interruptAfter(ITag tag) throws IOException, EOFException {
+    public boolean interruptAfter(ITagTrunk tag) throws IOException, EOFException {
         return false;
     }
 

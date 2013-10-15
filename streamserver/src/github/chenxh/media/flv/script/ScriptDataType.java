@@ -6,7 +6,7 @@ package github.chenxh.media.flv.script;
  * @author chenxh
  *
  */
-public final class ValueType {
+public final class ScriptDataType {
 
     public static final int DT_NUMBER = 0;
     public static final int DT_BOOLEAN = 1;
@@ -23,7 +23,7 @@ public final class ValueType {
     
     public static final Object NULL = new FinalValue("NULL");
     public static final Object END = new FinalValue("END");
-    private ValueType(){}
+    private ScriptDataType(){}
     
     public static boolean isNull(Object value) {
         return NULL == value;

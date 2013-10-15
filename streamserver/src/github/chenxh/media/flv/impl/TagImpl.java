@@ -1,20 +1,20 @@
 package github.chenxh.media.flv.impl;
 
-import github.chenxh.media.flv.ITag;
+import github.chenxh.media.flv.ITagTrunk;
 import github.chenxh.media.flv.ITagData;
 import github.chenxh.media.flv.ITagHead;
 
 
-public class FlvTagImpl implements ITag {
+public class TagImpl implements ITagTrunk {
     private long preTagSize;
     private ITagHead head;
     private ITagData data;
 
-    public FlvTagImpl(ITagHead head, ITagData data) {
+    public TagImpl(ITagHead head, ITagData data) {
         this(head, data, 0);
     }
 
-    public FlvTagImpl(ITagHead head, ITagData data, long preTagSize) {
+    public TagImpl(ITagHead head, ITagData data, long preTagSize) {
         this.head = head;
         this.data = data;
         this.preTagSize = preTagSize;
@@ -25,13 +25,13 @@ public class FlvTagImpl implements ITag {
     }
 
     @Override
-    public long getBodySize() {
-        return head.getBodySize();
+    public long getDataSize() {
+        return head.getDataSize();
     }
 
     @Override
-    public long getTagHeadSize() {
-        return head.getTagHeadSize();
+    public long getHeadSize() {
+        return head.getHeadSize();
     }
     
     
@@ -51,6 +51,11 @@ public class FlvTagImpl implements ITag {
 
     public void setPreTagSize(long preTagSize) {
         this.preTagSize = preTagSize;
+    }
+
+    @Override
+    public long getTimestamp() {
+        return head.getTimestamp();
     }
 
 }

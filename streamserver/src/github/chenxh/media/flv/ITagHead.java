@@ -1,34 +1,11 @@
 package github.chenxh.media.flv;
 
+import github.chenxh.media.IDataTrunk;
 
-public interface ITagHead {
 
-    /**
-     * Tag size
-     * 
-     * sum of data size and tag head size
-     * @return
-     */
-    public abstract long size();
+public interface ITagHead extends IDataTrunk {
 
-    /**
-     * tag head size in the tag
-     * 
-     * @return
-     */
-    public abstract long getTagHeadSize();
 
-    /**
-     * data size in the tag
-     * 
-     * @return
-     */
-    public abstract long getBodySize();
-
-    /**
-     * type of tag
-     * @return
-     */
-    public abstract int getType();
+    public long getTimestamp();
 
 }

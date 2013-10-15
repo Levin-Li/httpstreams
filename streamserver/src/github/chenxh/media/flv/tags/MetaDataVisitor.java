@@ -1,13 +1,13 @@
 package github.chenxh.media.flv.tags;
 
+import github.chenxh.media.IDataTrunk;
 import github.chenxh.media.UnsignedDataInput;
-import github.chenxh.media.flv.ITag;
+import github.chenxh.media.flv.ITagTrunk;
 import github.chenxh.media.flv.ITagData;
-import github.chenxh.media.flv.ITagHead;
 import github.chenxh.media.flv.script.EcmaArray;
 import github.chenxh.media.flv.script.FlvMetaData;
 import github.chenxh.media.flv.script.StrictArray;
-import github.chenxh.media.flv.script.ValueType;
+import github.chenxh.media.flv.script.ScriptDataType;
 
 import java.io.ByteArrayInputStream;
 import java.io.EOFException;
@@ -35,14 +35,14 @@ public class MetaDataVisitor extends TagDataVistorAdapter {
     private FlvMetaData metaData;
     
     @Override
-    public ITagData readScriptData(ITagHead header, UnsignedDataInput inStream) throws IOException {
-        if (header.getBodySize() > MAX_SCRIPT_DATASIZE){ 
+    public ITagData readScriptData(IDataTrunk header, UnsignedDataInput inStream) throws IOException {
+        if (header.getDataSize() > MAX_SCRIPT_DATASIZE){ 
             throw new IllegalArgumentException("ScriptData is too big to analysis, maxScriptSize is " +  MAX_SCRIPT_DATASIZE);
         }
         
         // 把所有脚本都读取出来
         // 避免多度或者少读，造成后面数据处理错误
-        byte[] script = new byte[(int) header.getBodySize()];
+        byte[] script = new byte[(int) header.getDataSize()];
         inStream.readFully(script);
         
         // 对脚本数据进行解析
@@ -52,7 +52,7 @@ public class MetaDataVisitor extends TagDataVistorAdapter {
     
     private FlvMetaData parseMetaData(UnsignedDataInput inStream) throws IOException{
         int keyType = inStream.readUI8();
-        if (keyType != ValueType.DT_STRING) {
+        if (keyType != ScriptDataType.DT_STRING) {
             return null;
         }
         String onMetadata = readString(inStream);
@@ -62,7 +62,7 @@ public class MetaDataVisitor extends TagDataVistorAdapter {
         }
 
         int valueType = inStream.readUI8();
-        if (valueType != ValueType.DT_ECMA_ARRAY) {
+        if (valueType != ScriptDataType.DT_ECMA_ARRAY) {
             // 不是标准类型
             return null;
         }
@@ -92,7 +92,7 @@ public class MetaDataVisitor extends TagDataVistorAdapter {
 
             // 009 结尾 
             if ( key.length() == 0 
-                    && ValueType.END == value) {
+                    && ScriptDataType.END == value) {
                 break;
             } else {
                 array.put(key, value);
@@ -105,47 +105,47 @@ public class MetaDataVisitor extends TagDataVistorAdapter {
             int valueType = inStream.readUI8();
             final Object value;
             switch (valueType) {
-                case ValueType.DT_NUMBER:
+                case ScriptDataType.DT_NUMBER:
                     value = readNumber(inStream);
                     break;
-                case ValueType.DT_BOOLEAN:
+                case ScriptDataType.DT_BOOLEAN:
                     value = readBoolean(inStream);
                     break;
-                case ValueType.DT_STRING:
+                case ScriptDataType.DT_STRING:
                     value = readString(inStream);
                     break;
-                case ValueType.DT_OBJECT:
+                case ScriptDataType.DT_OBJECT:
                     value = readEcmaArray(inStream, 6);
                     break;
-                case ValueType.DT_MOVIE_CLIP:
+                case ScriptDataType.DT_MOVIE_CLIP:
                     value = readMovieClip(inStream);
                     break;
-                case ValueType.DT_NULL:
+                case ScriptDataType.DT_NULL:
                     value = readNull(inStream);
                     break;
-                case ValueType.DT_ECMA_ARRAY:
+                case ScriptDataType.DT_ECMA_ARRAY:
                     int arrayLength = (int)inStream.readUI32();
                     value = readEcmaArray(inStream, arrayLength);
                     break;
-                case ValueType.DT_ARRAY:
+                case ScriptDataType.DT_ARRAY:
                     value = readArray(inStream);
                     break;
-                case ValueType.DT_DATETIME:
+                case ScriptDataType.DT_DATETIME:
                     value = readTimestamp(inStream);
                     break;
-                case ValueType.DT_LONGSTRIING:
+                case ScriptDataType.DT_LONGSTRIING:
                     value = readLongString(inStream);
                     break;
-                case ValueType.DT_REFERENCE:
-                case ValueType.DT_UNDEFINED:
+                case ScriptDataType.DT_REFERENCE:
+                case ScriptDataType.DT_UNDEFINED:
                 default:
-                    value = ValueType.END;
+                    value = ScriptDataType.END;
             }
 
             logger.debug("[{}]", value);
             return value;
         } catch (Exception e) {
-            return ValueType.END;
+            return ScriptDataType.END;
         }
         
     }
@@ -179,7 +179,7 @@ public class MetaDataVisitor extends TagDataVistorAdapter {
     }
 
     private Object readNull(UnsignedDataInput inStream) {
-        return ValueType.NULL;
+        return ScriptDataType.NULL;
     }
 
 
@@ -226,8 +226,8 @@ public class MetaDataVisitor extends TagDataVistorAdapter {
     }
 
     @Override
-    public boolean interruptAfter(ITag tag) throws IOException, EOFException {
-        return tag.getType() == ITag.SCRIPT_DATA;
+    public boolean interruptAfter(ITagTrunk tag) throws IOException, EOFException {
+        return tag.getType() == ITagTrunk.SCRIPT_DATA;
     }
     public FlvMetaData getMetaData() {
         return metaData;

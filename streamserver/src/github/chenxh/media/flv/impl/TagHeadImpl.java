@@ -4,24 +4,24 @@ import java.io.EOFException;
 import java.io.IOException;
 
 import github.chenxh.media.UnsignedDataInput;
-import github.chenxh.media.flv.ITag;
+import github.chenxh.media.flv.ITagTrunk;
 import github.chenxh.media.flv.ITagData;
 import github.chenxh.media.flv.ITagDataVistor;
 import github.chenxh.media.flv.ITagHead;
 
-public class FlvTagHead implements ITagHead {
+public class TagHeadImpl implements ITagHead {
     private static final int HEAD_SIZE = 11;
     private int tagType;
     private int dataSize;
-    private long timestamp;
+    public long timestamp;
 
     // always 0
     private int streamId;
 
     
-    protected FlvTagHead(){}
+    protected TagHeadImpl(){}
     
-    public FlvTagHead(int tagType,
+    public TagHeadImpl(int tagType,
             int dataSize,
             long timestamp,
             int streamId) {
@@ -52,11 +52,11 @@ public class FlvTagHead implements ITagHead {
      */
     public ITagData readData(ITagDataVistor decoder, UnsignedDataInput dataInput) throws EOFException, IOException {
         switch (getType()) {
-            case ITag.VIDEO:
+            case ITagTrunk.VIDEO:
                 return decoder.readVideoData(this, dataInput);
-            case ITag.AUDIO:
+            case ITagTrunk.AUDIO:
                 return decoder.readAudioData(this, dataInput);
-            case ITag.SCRIPT_DATA:
+            case ITagTrunk.SCRIPT_DATA:
                 return decoder.readScriptData(this, dataInput);
             default:
                 return decoder.readOtherData(this, dataInput);
@@ -85,17 +85,17 @@ public class FlvTagHead implements ITagHead {
     
     @Override
     public long size() {
-        return getTagHeadSize() + getBodySize();
+        return getHeadSize() + getDataSize();
     }
     
     
     @Override
-    public long getTagHeadSize() {
+    public long getHeadSize() {
         return HEAD_SIZE;
     }
 
     @Override
-    public long getBodySize() {
+    public long getDataSize() {
         return dataSize;
     }
     
@@ -105,7 +105,7 @@ public class FlvTagHead implements ITagHead {
         
         b.append("{");
         b.append("[type:").append(getType()).append("]");
-        b.append(", [dataSize:").append(getBodySize()).append("]");
+        b.append(", [dataSize:").append(getDataSize()).append("]");
         b.append(", [timestamp:").append(getTimestamp()).append("]");
         b.append(", [streamId:").append(getStreamId()).append("]");
         b.append("}");

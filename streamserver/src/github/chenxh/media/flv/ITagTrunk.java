@@ -1,6 +1,8 @@
 package github.chenxh.media.flv;
 
-public interface ITag extends ITagHead {
+import github.chenxh.media.IDataTrunk;
+
+public interface ITagTrunk extends IDataTrunk {
     public static final int HEAD = -1;
     public static final int VIDEO = 9;
     public static final int AUDIO = 8;
@@ -19,4 +21,6 @@ public interface ITag extends ITagHead {
      * @return
      */
     public ITagData getData();
+    
+    public long getTimestamp();
 }

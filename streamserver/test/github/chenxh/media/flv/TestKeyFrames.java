@@ -1,15 +1,14 @@
 package github.chenxh.media.flv;
 
+import github.chenxh.media.UnsignedDataInput;
 import github.chenxh.media.flv.script.FlvMetaData;
+import github.chenxh.media.flv.tags.KeyFrameVisitor;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-public class TestMetaData {
+public class TestKeyFrames {
     public static void main(String[] args) throws IOException {
         FlvDecoder decoder = new FlvDecoder();
 
@@ -18,8 +17,10 @@ public class TestMetaData {
         FileInputStream inStream = null;
         try {
             inStream = new FileInputStream(file);
-            FlvMetaData metaData = decoder.decode(inStream);
-            System.out.println(metaData);
+            KeyFrameVisitor frameVisitor = new KeyFrameVisitor();
+            FlvSignature flv = decoder.decode(new UnsignedDataInput(inStream), frameVisitor);
+            
+            System.out.println(frameVisitor.getKeyFrames());
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

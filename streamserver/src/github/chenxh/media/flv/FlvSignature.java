@@ -1,5 +1,7 @@
 package github.chenxh.media.flv;
 
+import github.chenxh.media.IDataTrunk;
+
 
 
 /**
@@ -7,7 +9,7 @@ package github.chenxh.media.flv;
  * @author chenxh
  *
  */
-public class FlvSignature implements ITag {
+public class FlvSignature implements IDataTrunk {
     private static final long HEAD_SIZE = 9;
     
     private String signature = "FLV";
@@ -72,7 +74,7 @@ public class FlvSignature implements ITag {
 
         // ±Í«©¥Û–°
         b.append(" ");
-        b.append("size=").append(getBodySize()).append("+").append(getBodySize());
+        b.append("size=").append(getDataSize()).append("+").append(getDataSize());
         
         return b.toString();
     }
@@ -81,7 +83,7 @@ public class FlvSignature implements ITag {
     // implement interface of Tag
     // --------------------------------------------------------------
     @Override
-    public long getTagHeadSize() {
+    public long getHeadSize() {
         return HEAD_SIZE;
     }
     
@@ -91,22 +93,12 @@ public class FlvSignature implements ITag {
     }
 
     @Override
-    public long getBodySize() {
-        return size() - getTagHeadSize();
-    }
-    
-    @Override
-    public int getType() {
-        return HEAD;
+    public long getDataSize() {
+        return size() - getHeadSize();
     }
 
     @Override
-    public ITagData getData() {
-        return null;
-    }
-    
-    @Override
-    public long getPreTagSize() {
-        return 0;
+    public int getType() {
+        return ITagTrunk.HEAD;
     }
 }

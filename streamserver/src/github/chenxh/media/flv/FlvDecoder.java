@@ -2,12 +2,13 @@ package github.chenxh.media.flv;
 
 import github.chenxh.media.UnsignedDataInput;
 import github.chenxh.media.UnsupportMediaTypeException;
-import github.chenxh.media.flv.impl.FlvTagHead;
-import github.chenxh.media.flv.impl.FlvTagImpl;
+import github.chenxh.media.flv.impl.TagHeadImpl;
+import github.chenxh.media.flv.impl.TagImpl;
 import github.chenxh.media.flv.script.FlvMetaData;
 import github.chenxh.media.flv.tags.MetaDataVisitor;
+import github.chenxh.media.flv.tags.TagDataVistorAdapter;
 
-import java.io.BufferedInputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -31,17 +32,7 @@ public class FlvDecoder {
      * @throws IOException 
      */
     public FlvMetaData decode(InputStream inStream) throws IOException {
-        // 使用缓冲输入流
-        final BufferedInputStream bInStream;
-        if (inStream instanceof BufferedInputStream) {
-            bInStream = (BufferedInputStream) inStream;
-        } else {
-            bInStream = new BufferedInputStream(inStream);
-        }
-
-        // 二次包装，使用数据结构
-        UnsignedDataInput di = new UnsignedDataInput(bInStream);
-        return decode(di);
+        return decode(new UnsignedDataInput(inStream));
     }
 
     /**
@@ -59,15 +50,44 @@ public class FlvDecoder {
         return metaDataVisitor.getMetaData();
     }
 
-    public FlvSignature decode(UnsignedDataInput inStream, ITagDataVistor tagDataVisitor) throws IOException {
+    public FlvSignature decode(UnsignedDataInput inStream, IDataVisitor dataVisitor) throws IOException {
+        // 读取 flv 头
+        IFileHeadDataVisitor headDataVisitor = null;
+        if (dataVisitor instanceof IFileHeadDataVisitor) {
+            headDataVisitor = (IFileHeadDataVisitor)dataVisitor;
+        }
+
+        // 读取 flv tag 列表
+        ITagDataVistor tagDataVisitor = null;
+        if (dataVisitor instanceof ITagDataVistor) {
+            tagDataVisitor = (ITagDataVistor) dataVisitor;
+        }
+        
+        return decode(inStream, tagDataVisitor, headDataVisitor);
+    }
+
+    public FlvSignature decode(UnsignedDataInput inStream,
+            ITagDataVistor tagDataVisitor, IFileHeadDataVisitor headDataVisitor) throws IOException, UnsupportMediaTypeException, EOFException {
+
+        // 读取  flv 头部内容
+        if (null == headDataVisitor) {
+            headDataVisitor = defaultFileHeadVisitor;
+        }
         FlvSignature header = readFileHead(inStream);
+        headDataVisitor.readFileHeadData(header, inStream);
+        
+        // 不需要读取以后的内容
+        if (null == tagDataVisitor) {
+            return header;
+        }
+
         long firstTagSize = inStream.readUI32();
         if (firstTagSize != 0) {
             logger.warn("size of first tag is not 0!");
         }
 
         long previousTagSize = firstTagSize;
-        FlvTagImpl curTag = null;
+        TagImpl curTag = null;
         do {
             // read tag
             curTag = readTag(inStream, tagDataVisitor);
@@ -84,7 +104,6 @@ public class FlvDecoder {
             }
             previousTagSize = inStream.readUI32();
         }while(true);
-        
         return header;
     }
     
@@ -111,9 +130,6 @@ public class FlvDecoder {
         long headerSize = inStream.readUI32();
         FlvSignature header = new FlvSignature(signature, version, typeFlags, (int)headerSize);
 
-        // 还有其他内容，暂不支持解析，直接跳过
-        skipBodyOf(header, inStream);
-
         return header;
     }
     
@@ -124,7 +140,7 @@ public class FlvDecoder {
      * @return null if no another datas
      * @throws IOException 
      */
-    private FlvTagImpl readTag(UnsignedDataInput inStream, ITagDataVistor dataVisitor) throws IOException {
+    private TagImpl readTag(UnsignedDataInput inStream, ITagDataVistor dataVisitor) throws IOException {
         int tagType = inStream.read();
         if (-1 == tagType) { // 已经到文件末尾了
             return  null;
@@ -136,19 +152,33 @@ public class FlvDecoder {
         int timstampExtended = inStream.readUI8();
         int streamId = inStream.readUI24();
         long realTimestamp = ((long)timstampExtended << 24) | timestamp;
-        FlvTagHead head = new FlvTagHead(tagType, dataSize, realTimestamp, streamId);
+        TagHeadImpl head = new TagHeadImpl(tagType, dataSize, realTimestamp, streamId);
 
         // read tag data
         ITagData data = head.readData(dataVisitor, inStream);
 
-        return new FlvTagImpl(head, data);
+        return new TagImpl(head, data);
     }
 
-    private static void skipBodyOf(ITagHead tag, UnsignedDataInput inStream) throws IOException {
-        if (tag.getBodySize() > 0) { 
-            long bodysize = tag.getBodySize();
-            inStream.skipBytes(bodysize);
+    private static final class DefaultFileHeadVisitor implements IFileHeadDataVisitor {
+        @Override
+        public void readFileHeadData(FlvSignature flv, UnsignedDataInput inStream) throws IOException {
+            if (flv.getDataSize() > 0) { 
+                long bodysize = flv.getDataSize();
+                inStream.skipBytes(bodysize);
+            }
         }
     }
+    private static final IFileHeadDataVisitor defaultFileHeadVisitor = new  DefaultFileHeadVisitor();
+    
+    
+    
+    private static final class DefaultTagDataVisitor extends TagDataVistorAdapter {
+        @Override
+        public boolean interruptAfter(ITagTrunk tag) throws IOException, EOFException {
+            return true;
+        }
+    }
+    
     
 }

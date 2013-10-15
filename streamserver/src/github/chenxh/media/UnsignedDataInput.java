@@ -1,15 +1,28 @@
 package github.chenxh.media;
 
-import java.io.DataInputStream;
+import java.io.BufferedInputStream;
 import java.io.EOFException;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
 public class UnsignedDataInput extends FilterInputStream {
-    public UnsignedDataInput(InputStream in) {
-        super(in);
+
+    private static InputStream wrapper (InputStream inStream) {
+        // 使用缓冲输入流
+        final BufferedInputStream bInStream;
+        if (inStream instanceof BufferedInputStream) {
+            bInStream = (BufferedInputStream) inStream;
+        } else {
+            bInStream = new BufferedInputStream(inStream);
+        }
+        return bInStream;
     }
+
+    public UnsignedDataInput(InputStream in) {
+        super(wrapper(in));
+    }
+
 
     /**
      * read 4byte as unsinged int
