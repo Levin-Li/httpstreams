@@ -1,10 +1,14 @@
-package github.chenxh.media.flv.script;
+package github.chenxh.media.flv.tags;
 
 import github.chenxh.media.UnsignedDataInput;
 import github.chenxh.media.flv.ITag;
 import github.chenxh.media.flv.ITagData;
 import github.chenxh.media.flv.ITagDataVistor;
 import github.chenxh.media.flv.ITagHead;
+import github.chenxh.media.flv.script.EcmaArray;
+import github.chenxh.media.flv.script.FlvMetaData;
+import github.chenxh.media.flv.script.StrictArray;
+import github.chenxh.media.flv.script.ValueType;
 
 import java.io.ByteArrayInputStream;
 import java.io.EOFException;

@@ -5,7 +5,7 @@ import github.chenxh.media.UnsupportMediaTypeException;
 import github.chenxh.media.flv.impl.FlvTagHead;
 import github.chenxh.media.flv.impl.FlvTagImpl;
 import github.chenxh.media.flv.script.FlvMetaData;
-import github.chenxh.media.flv.script.MetaDataVisitor;
+import github.chenxh.media.flv.tags.MetaDataVisitor;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
