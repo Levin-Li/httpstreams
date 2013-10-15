@@ -3,7 +3,6 @@ package github.chenxh.media.flv.tags;
 import github.chenxh.media.UnsignedDataInput;
 import github.chenxh.media.flv.ITag;
 import github.chenxh.media.flv.ITagData;
-import github.chenxh.media.flv.ITagDataVistor;
 import github.chenxh.media.flv.ITagHead;
 import github.chenxh.media.flv.script.EcmaArray;
 import github.chenxh.media.flv.script.FlvMetaData;
@@ -26,7 +25,7 @@ import org.slf4j.LoggerFactory;
  * @author chenxh
  * 
  */
-public class MetaDataVisitor implements ITagDataVistor {
+public class MetaDataVisitor extends TagDataVistorAdapter {
     // 最多处理  8MB 的metadata
     private static final int MAX_SCRIPT_DATASIZE = 1024 * 1024 * 8;
 
@@ -227,37 +226,9 @@ public class MetaDataVisitor implements ITagDataVistor {
     }
 
     @Override
-    public ITagData readAudioData(ITagHead header, UnsignedDataInput inStream) throws IOException {
-        return skipDatas(header, inStream);
-    }
-
-    @Override
-    public ITagData readOtherData(ITagHead header, UnsignedDataInput inStream) throws IOException {
-        return skipDatas(header, inStream);
-    }
-
-    @Override
     public boolean interruptAfter(ITag tag) throws IOException, EOFException {
         return tag.getType() == ITag.SCRIPT_DATA;
     }
-    @Override
-    public ITagData readVideoData(ITagHead header, UnsignedDataInput inStream) throws IOException {
-        return skipDatas(header, inStream);
-    }
-
-    /**
-     * 忽略内容
-     * 
-     * @param header
-     * @param inStream
-     * @return
-     * @throws IOException
-     */
-    private ITagData skipDatas(ITagHead header, UnsignedDataInput inStream) throws IOException {
-        inStream.skipBytes(header.getBodySize());
-        return null;
-    }
-
     public FlvMetaData getMetaData() {
         return metaData;
     }
