@@ -2,7 +2,7 @@ package github.chenxh.media.flv.tags;
 
 import github.chenxh.media.UnsignedDataInput;
 import github.chenxh.media.flv.FlvSignature;
-import github.chenxh.media.flv.IFileHeadDataVisitor;
+import github.chenxh.media.flv.ISignatureDataVisitor;
 import github.chenxh.media.flv.ITagData;
 import github.chenxh.media.flv.ITagHead;
 import github.chenxh.media.flv.ITagTrunk;

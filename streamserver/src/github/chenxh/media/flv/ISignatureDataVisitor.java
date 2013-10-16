@@ -4,12 +4,12 @@ import java.io.IOException;
 
 import github.chenxh.media.UnsignedDataInput;
 
-public interface IFileHeadDataVisitor {
+public interface ISignatureDataVisitor {
     /**
-     * 读取  FLV 文件头
+     * 读取  FLV 文件头内容
      * 
      * @param inStream
      * @throws IOException
      */
-    public void readFileHeadData(FlvSignature flv, UnsignedDataInput inStream) throws IOException;
+    public void readSignatureData(FlvSignature flv, UnsignedDataInput inStream) throws IOException;
 }

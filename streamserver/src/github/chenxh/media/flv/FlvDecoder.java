@@ -55,14 +55,14 @@ public class FlvDecoder {
     }
     
     public FlvSignature decode(UnsignedDataInput inStream,
-            IFileHeadDataVisitor headDataVisitor, ITagDataVistor tagDataVisitor) throws IOException, UnsupportMediaTypeException, EOFException {
+            ISignatureDataVisitor signatureDataVisitor, ITagDataVistor tagDataVisitor) throws IOException, UnsupportMediaTypeException, EOFException {
 
         // 读取  flv 头部内容
-        if (null == headDataVisitor) {
-            headDataVisitor = defaultFileHeadVisitor;
+        if (null == signatureDataVisitor) {
+            signatureDataVisitor = defaultFileHeadVisitor;
         }
         FlvSignature header = readFileHead(inStream);
-        headDataVisitor.readFileHeadData(header, inStream);
+        signatureDataVisitor.readSignatureData(header, inStream);
         
         // 不需要读取以后的内容
         if (null == tagDataVisitor) {
@@ -149,25 +149,14 @@ public class FlvDecoder {
         return new TagImpl(head, data);
     }
 
-    private static final class DefaultFileHeadVisitor implements IFileHeadDataVisitor {
+    private static final class DefaultFileHeadVisitor implements ISignatureDataVisitor {
         @Override
-        public void readFileHeadData(FlvSignature flv, UnsignedDataInput inStream) throws IOException {
+        public void readSignatureData(FlvSignature flv, UnsignedDataInput inStream) throws IOException {
             if (flv.getDataSize() > 0) { 
                 long bodysize = flv.getDataSize();
                 inStream.skipBytes(bodysize);
             }
         }
     }
-    private static final IFileHeadDataVisitor defaultFileHeadVisitor = new  DefaultFileHeadVisitor();
-    
-    
-    
-    private static final class DefaultTagDataVisitor extends TagDataVistorAdapter {
-        @Override
-        public boolean interruptAfter(ITagTrunk tag) throws IOException, EOFException {
-            return true;
-        }
-    }
-    
-    
+    private static final ISignatureDataVisitor defaultFileHeadVisitor = new  DefaultFileHeadVisitor();
 }
