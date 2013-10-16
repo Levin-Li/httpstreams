@@ -8,7 +8,6 @@ import github.chenxh.media.flv.script.FlvMetaData;
 import github.chenxh.media.flv.script.KeyFrames;
 import github.chenxh.media.flv.tags.KeyFrameVisitor;
 import github.chenxh.media.flv.tags.MetaDataVisitor;
-import github.chenxh.media.flv.tags.TagDataVistorAdapter;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -35,7 +34,12 @@ public class FlvDecoder {
      */
     public FlvMetaData decodeMetaData(UnsignedDataInput inStream) throws IOException {
         MetaDataVisitor metaDataVisitor = new MetaDataVisitor();
-        decode(inStream, null, metaDataVisitor);
+        
+        try {
+            decode(inStream, null, metaDataVisitor);
+        } catch (Exception e) {
+            logger.warn("解析 metadata 错误，原因:" + e.getMessage(), e);
+        }
 
         return metaDataVisitor.getMetaData();
     }
@@ -50,7 +54,12 @@ public class FlvDecoder {
     public KeyFrames decodeKeyFrames(UnsignedDataInput inStream) throws IOException  {
         KeyFrameVisitor frameVisitor = new KeyFrameVisitor();
 
-        decode(inStream, null, frameVisitor);
+        try {
+            decode(inStream, null, frameVisitor);
+        } catch (Exception e) {
+            logger.warn("解析关键帧错误，原因:" + e.getMessage(), e);
+        }
+
         return frameVisitor.getKeyFrames();
     }
     
@@ -71,7 +80,7 @@ public class FlvDecoder {
 
         long firstTagSize = inStream.readUI32();
         if (firstTagSize != 0) {
-            logger.warn("size of first tag is not 0!");
+            logger.warn("size of first tag is {}, normal is 0!", firstTagSize);
         }
 
         long previousTagSize = firstTagSize;
