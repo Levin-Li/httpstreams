@@ -94,8 +94,8 @@ flowplayer("player", "http://releases.flowplayer.org/swf/flowplayer-3.2.16.swf",
     },
     
     clip: {
-        url: 'test.flv',
-
+        url: 'demo/test.flv?r=' + Math.random(),
+        start:60 * 24,
         provider: 'pseudo',
 
         // you can do different things on each cuepoint by checking the time

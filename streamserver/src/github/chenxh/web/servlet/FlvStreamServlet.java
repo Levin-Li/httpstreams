@@ -13,6 +13,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -32,7 +33,7 @@ public class FlvStreamServlet extends HttpServlet {
     
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String uri = req.getRequestURI().substring((getServletContext().getContextPath() + "/flvx").length());
+        String uri = req.getRequestURI().substring(appUriPrefix.length());
         String filepath = getServletContext().getRealPath(uri);
         logger.debug("download:{}", filepath);
 
@@ -132,6 +133,15 @@ public class FlvStreamServlet extends HttpServlet {
         } finally {
             IOUtils.closeQuietly(inStream);
         }
+    }
+
+    private String appUriPrefix;
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+        
+        String app = config.getInitParameter("app");
+        appUriPrefix = config.getServletContext().getContextPath() + "/" + app;
     }
     
     /**
