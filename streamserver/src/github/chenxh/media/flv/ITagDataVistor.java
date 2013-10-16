@@ -24,5 +24,7 @@ public interface ITagDataVistor {
      * @throws IOException
      * @throws EOFException
      */
-    public abstract boolean interruptAfter(ITagTrunk tag) throws IOException, EOFException;
+    public abstract boolean interruptAfterTag(ITagTrunk tag) throws IOException, EOFException;
+
+    public boolean interruptAfterSignature(FlvSignature signature) throws IOException, EOFException;
 }

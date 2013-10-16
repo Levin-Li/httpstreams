@@ -32,9 +32,24 @@ public class MetaDataVisitor extends TagDataVistorAdapter {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-
+    private boolean interruptAfterFirstTag;
     private FlvMetaData metaData;
     
+    public MetaDataVisitor() {
+        this(true);
+    }
+    
+    /**
+     * interruptAfterFirstTag=true，表示读取第一个 tag 的记录就中断，
+     *     如果 flv 文件都能保持把 metadata 放在头部，则处理效率最高
+     * 
+     * interruptAfterFirstTag=false, 表示一直遍历文件，直到出现 metadata Tag
+     * 
+     * @param interruptAfterFirstTag
+     */
+    public MetaDataVisitor(boolean interruptAfterFirstTag) {
+        this.interruptAfterFirstTag = interruptAfterFirstTag;
+    }
     @Override
     public ITagData readScriptData(FlvSignature flv, IDataTrunk header, UnsignedDataInput inStream) throws IOException {
         if (header.getDataSize() > MAX_SCRIPT_DATASIZE){ 
@@ -48,10 +63,10 @@ public class MetaDataVisitor extends TagDataVistorAdapter {
         
         // 对脚本数据进行解析
         UnsignedDataInput scriptData = new UnsignedDataInput(new ByteArrayInputStream(script));
-        return metaData = parseMetaData(scriptData);
+        return metaData = parseMetaData(flv, scriptData);
     }
     
-    private FlvMetaData parseMetaData(UnsignedDataInput inStream) throws IOException{
+    private FlvMetaData parseMetaData(FlvSignature flv, UnsignedDataInput inStream) throws IOException{
         int keyType = inStream.readUI8();
         if (keyType != ScriptDataType.DT_STRING) {
             return null;
@@ -70,7 +85,7 @@ public class MetaDataVisitor extends TagDataVistorAdapter {
 
         int arrayLength = (int)inStream.readUI32();
         EcmaArray array = readEcmaArray(inStream, arrayLength);
-        return FlvMetaData.parseEcmaArray(array);
+        return FlvMetaData.parseEcmaArray(flv, array);
     }
 
     private EcmaArray readEcmaArray(UnsignedDataInput inStream, int arrayLength) {
@@ -227,9 +242,10 @@ public class MetaDataVisitor extends TagDataVistorAdapter {
     }
 
     @Override
-    public boolean interruptAfter(ITagTrunk tag) throws IOException, EOFException {
-        return tag.getType() == ITagTrunk.SCRIPT_DATA;
+    public boolean interruptAfterTag(ITagTrunk tag) throws IOException, EOFException {
+        return !interruptAfterFirstTag && null != metaData;
     }
+
     public FlvMetaData getMetaData() {
         return metaData;
     }

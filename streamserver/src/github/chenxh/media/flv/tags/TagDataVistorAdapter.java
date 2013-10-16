@@ -50,9 +50,12 @@ public class TagDataVistorAdapter  implements ITagDataVistor {
         return null;
     }
 
-    @Override
-    public boolean interruptAfter(ITagTrunk tag) throws IOException, EOFException {
+    public boolean interruptAfterSignature(FlvSignature signature) throws IOException, EOFException {
         return false;
     }
-
+    
+    @Override
+    public boolean interruptAfterTag(ITagTrunk tag) throws IOException, EOFException {
+        return false;
+    }
 }

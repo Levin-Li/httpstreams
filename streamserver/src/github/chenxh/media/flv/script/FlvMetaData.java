@@ -1,5 +1,6 @@
 package github.chenxh.media.flv.script;
 
+import github.chenxh.media.flv.FlvSignature;
 import github.chenxh.media.flv.ITagData;
 import github.chenxh.media.flv.script.StrictArray.ITypeConverter;
 
@@ -15,13 +16,16 @@ import org.apache.commons.lang.ArrayUtils;
  *
  */
 public class FlvMetaData implements ITagData {
+    private FlvSignature signature;
     private EcmaArray object;
 
-    private FlvMetaData(EcmaArray object) {
+    private FlvMetaData(FlvSignature signature, EcmaArray object) {
+        this.signature = signature;
         this.object = object;
     }
-    public static FlvMetaData parseEcmaArray(EcmaArray object){
-        return new FlvMetaData(object);
+
+    public static FlvMetaData parseEcmaArray(FlvSignature signature, EcmaArray object){
+        return new FlvMetaData(signature, object);
     }
 
     // ----------------------------------------------------
@@ -37,7 +41,7 @@ public class FlvMetaData implements ITagData {
          && null != getEcmaArray("keyframes");
     }
 
-    public long[] getFilepositions(){
+    public long[] getFilePositions(){
         if (hasKeyframes()) {
             return KeyFrames.getFilepositions(getEcmaArray("keyframes"));
         } else {
@@ -45,6 +49,49 @@ public class FlvMetaData implements ITagData {
         }
     }
 
+    /**
+     * 根据时间戳，获得起始帧的未知
+     * 
+     * @param times
+     * @return -1 if has't key frames or startAt is max then the last key frame
+     */
+    public long getFilePosition(double startAt) {
+        long targetPosition = -1;
+        if (!hasKeyframes()) {
+            return targetPosition;
+        }
+        
+        double[] times = getTimes();
+        long[] positions = getFilePositions();
+        for (int i = 0; i < positions.length && i < times.length; i++) {
+            if (startAt <= times[i]) {
+                targetPosition = positions[i];
+            } else {
+                break;
+            }
+        }
+
+        return targetPosition;
+    }
+    
+    public long getNearestPosition(long position) {
+        long targetPosition = -1;
+        if (!hasKeyframes()) {
+            return targetPosition;
+        }
+        
+        long[] positions = getFilePositions();
+        for (int i = 0; i < positions.length; i++) {
+            if (position <= positions[i]) {
+                targetPosition = positions[i];
+            } else {
+                break;
+            }
+        }
+
+        return targetPosition;
+    }
+    
     public double[] getTimes(){
         if (hasKeyframes()) {
             return KeyFrames.getTimes(getEcmaArray("keyframes"));
@@ -174,7 +221,7 @@ public class FlvMetaData implements ITagData {
         b.append(" duration=").append(getDuration()).append("\r\n");
         
         // 关键帧索引
-        long[] filepositions = getFilepositions();
+        long[] filepositions = getFilePositions();
         double[] times = getTimes();
         b.append(" hasKeyframes=").append(hasKeyframes()).append("\r\n");
         b.append(" keyframes=").append("\r\n");
@@ -190,5 +237,9 @@ public class FlvMetaData implements ITagData {
         }
         
         return b.toString();
+    }
+
+    public FlvSignature getSignature() {
+        return signature;
     }
 }

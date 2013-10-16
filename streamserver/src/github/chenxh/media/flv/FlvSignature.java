@@ -10,7 +10,7 @@ import github.chenxh.media.IDataTrunk;
  *
  */
 public class FlvSignature implements IDataTrunk {
-    private static final long HEAD_SIZE = 9;
+    public static final int MIN_HEAD_SIZE = 9;
     
     private String signature = "FLV";
     private int version = 1;
@@ -21,7 +21,8 @@ public class FlvSignature implements IDataTrunk {
      * U[1], Must be 0
      * U[1], Video tags are present
      */
-    private int typeFlag = 5;
+    private int typeFlags = 5;
+
 
     /***
      * offsett n bytes from start of file to start of body
@@ -38,20 +39,24 @@ public class FlvSignature implements IDataTrunk {
     public FlvSignature(String signature, int version, int typeFlag, int headerSize) {
         this.signature = signature;
         this.version = version;
-        this.typeFlag = typeFlag;
+        this.typeFlags = typeFlag;
         this.dataOffSet = headerSize;
     }
     
     public boolean hasAudioTags() {
-        return 1 == ((typeFlag >> 2) & 0x01);
+        return 1 == ((typeFlags >> 2) & 0x01);
     }
 
     public boolean hasVideoTags(){
-        return 1 == ((typeFlag >> 0) & 0x01);
+        return 1 == ((typeFlags >> 0) & 0x01);
     }
     
     public int getVersion() {
         return version;
+    }
+
+    public int getTypeFlags() {
+        return typeFlags;
     }
 
     // -------------------------------------------------------------
@@ -84,7 +89,7 @@ public class FlvSignature implements IDataTrunk {
     // --------------------------------------------------------------
     @Override
     public long getHeadSize() {
-        return HEAD_SIZE;
+        return MIN_HEAD_SIZE;
     }
     
     @Override

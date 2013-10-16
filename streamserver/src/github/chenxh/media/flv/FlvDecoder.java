@@ -12,6 +12,7 @@ import github.chenxh.media.flv.tags.MetaDataVisitor;
 import java.io.EOFException;
 import java.io.IOException;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,8 +38,12 @@ public class FlvDecoder {
         
         try {
             decode(inStream, null, metaDataVisitor);
+            
+            inStream.close();
         } catch (Exception e) {
             logger.warn("解析 metadata 错误，原因:" + e.getMessage(), e);
+        } finally {
+            IOUtils.closeQuietly(inStream);
         }
 
         return metaDataVisitor.getMetaData();
@@ -56,8 +61,12 @@ public class FlvDecoder {
 
         try {
             decode(inStream, null, frameVisitor);
+            
+            inStream.close();
         } catch (Exception e) {
             logger.warn("解析关键帧错误，原因:" + e.getMessage(), e);
+        } finally {
+            IOUtils.closeQuietly(inStream);
         }
 
         return frameVisitor.getKeyFrames();
@@ -72,9 +81,10 @@ public class FlvDecoder {
         }
         FlvSignature header = readFileHead(inStream);
         signatureDataVisitor.readSignatureData(header, inStream);
-        
+
         // 不需要读取以后的内容
-        if (null == tagDataVisitor) {
+        if (null == tagDataVisitor
+                || tagDataVisitor.interruptAfterSignature(header)) {
             return header;
         }
 
@@ -96,7 +106,7 @@ public class FlvDecoder {
             curTag.setPreTagSize(previousTagSize);
             
             // 
-            if (tagDataVisitor.interruptAfter(curTag)) {
+            if (tagDataVisitor.interruptAfterTag(curTag)) {
                 break;
             }
             previousTagSize = inStream.readUI32();

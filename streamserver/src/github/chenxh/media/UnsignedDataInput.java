@@ -319,4 +319,8 @@ public class UnsignedDataInput extends FilterInputStream {
         return total;
     }
 
+    @Override
+    protected void finalize() throws Throwable {
+        close();
+    }
 }
