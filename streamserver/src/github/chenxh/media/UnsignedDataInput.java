@@ -2,6 +2,9 @@ package github.chenxh.media;
 
 import java.io.BufferedInputStream;
 import java.io.EOFException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,6 +26,9 @@ public class UnsignedDataInput extends FilterInputStream {
         super(wrapper(in));
     }
 
+    public UnsignedDataInput(File source) throws FileNotFoundException {
+        this(new FileInputStream(source));
+    }
 
     /**
      * read 4byte as unsinged int

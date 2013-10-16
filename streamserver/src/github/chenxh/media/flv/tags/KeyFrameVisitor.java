@@ -17,7 +17,8 @@ import java.io.IOException;
  * @author chenxh
  *
  */
-public class KeyFrameVisitor extends TagDataVistorAdapter implements IFileHeadDataVisitor {
+public class KeyFrameVisitor extends TagDataVistorAdapter {
+    private FlvSignature signature;
     private KeyFrames keyFrames = new KeyFrames();
 
     private long newTagPosition;
@@ -31,13 +32,9 @@ public class KeyFrameVisitor extends TagDataVistorAdapter implements IFileHeadDa
     }
 
     @Override
-    public void readFileHeadData(FlvSignature flv, UnsignedDataInput inStream) throws IOException {
-        newTagPosition = flv.size();
-        newTagPosition += 4;
-    }
+    public ITagData readVideoData(FlvSignature signature, ITagHead header, UnsignedDataInput inStream) throws IOException {
+        init(signature);
 
-    @Override
-    public ITagData readVideoData(ITagHead header, UnsignedDataInput inStream) throws IOException {
         long dataSize = header.getDataSize();
 
         // 只读取第一个字节
@@ -54,6 +51,18 @@ public class KeyFrameVisitor extends TagDataVistorAdapter implements IFileHeadDa
         return null;
     }
     
+    private void init(FlvSignature signature) {
+        if (!isInited()) {
+            this.signature = signature;
+            newTagPosition = signature.size();
+            newTagPosition += 4;
+        }
+    }
+
+    private boolean isInited() {
+        return this.signature == null;
+    }
+
     @Override
     public boolean interruptAfter(ITagTrunk tag) throws IOException, EOFException {
         newTagPosition += 4; // 每个 tag 之前，都会有 4 字节用来记录上一个  tag 的大小 

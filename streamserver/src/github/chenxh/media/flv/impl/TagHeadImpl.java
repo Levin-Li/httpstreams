@@ -4,6 +4,7 @@ import java.io.EOFException;
 import java.io.IOException;
 
 import github.chenxh.media.UnsignedDataInput;
+import github.chenxh.media.flv.FlvSignature;
 import github.chenxh.media.flv.ITagTrunk;
 import github.chenxh.media.flv.ITagData;
 import github.chenxh.media.flv.ITagDataVistor;
@@ -45,21 +46,22 @@ public class TagHeadImpl implements ITagHead {
 
     /**
      * 
+     * @param flv TODO
      * @param decoder
      * @param dataInput
      * @throws IOException 
      * @throws EOFException 
      */
-    public ITagData readData(ITagDataVistor decoder, UnsignedDataInput dataInput) throws EOFException, IOException {
+    public ITagData readData(FlvSignature flv, ITagDataVistor decoder, UnsignedDataInput dataInput) throws EOFException, IOException {
         switch (getType()) {
             case ITagTrunk.VIDEO:
-                return decoder.readVideoData(this, dataInput);
+                return decoder.readVideoData(flv, this, dataInput);
             case ITagTrunk.AUDIO:
-                return decoder.readAudioData(this, dataInput);
+                return decoder.readAudioData(flv, this, dataInput);
             case ITagTrunk.SCRIPT_DATA:
-                return decoder.readScriptData(this, dataInput);
+                return decoder.readScriptData(flv, this, dataInput);
             default:
-                return decoder.readOtherData(this, dataInput);
+                return decoder.readOtherData(flv, this, dataInput);
         }
     }
     

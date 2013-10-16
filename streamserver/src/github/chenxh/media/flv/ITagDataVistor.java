@@ -6,15 +6,15 @@ import github.chenxh.media.UnsignedDataInput;
 import java.io.EOFException;
 import java.io.IOException;
 
-public interface ITagDataVistor  extends IDataVisitor{
+public interface ITagDataVistor {
 
-    public abstract ITagData readVideoData(ITagHead header, UnsignedDataInput inStream) throws IOException, EOFException;
+    public abstract ITagData readVideoData(FlvSignature flv, ITagHead header, UnsignedDataInput inStream) throws IOException, EOFException;
 
-    public abstract ITagData readAudioData(IDataTrunk tagHeader, UnsignedDataInput inStream) throws IOException, EOFException;
+    public abstract ITagData readAudioData(FlvSignature flv, IDataTrunk tagHeader, UnsignedDataInput inStream) throws IOException, EOFException;
 
-    public abstract ITagData readScriptData(IDataTrunk header, UnsignedDataInput inStream) throws IOException, EOFException;
+    public abstract ITagData readScriptData(FlvSignature flv, IDataTrunk header, UnsignedDataInput inStream) throws IOException, EOFException;
 
-    public abstract ITagData readOtherData(IDataTrunk header, UnsignedDataInput inStream) throws IOException, EOFException;
+    public abstract ITagData readOtherData(FlvSignature flv, IDataTrunk header, UnsignedDataInput inStream) throws IOException, EOFException;
 
     /**
      * 在这个标签之后是否中断继续遍历

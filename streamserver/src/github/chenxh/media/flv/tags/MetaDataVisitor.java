@@ -2,6 +2,7 @@ package github.chenxh.media.flv.tags;
 
 import github.chenxh.media.IDataTrunk;
 import github.chenxh.media.UnsignedDataInput;
+import github.chenxh.media.flv.FlvSignature;
 import github.chenxh.media.flv.ITagTrunk;
 import github.chenxh.media.flv.ITagData;
 import github.chenxh.media.flv.script.EcmaArray;
@@ -35,7 +36,7 @@ public class MetaDataVisitor extends TagDataVistorAdapter {
     private FlvMetaData metaData;
     
     @Override
-    public ITagData readScriptData(IDataTrunk header, UnsignedDataInput inStream) throws IOException {
+    public ITagData readScriptData(FlvSignature flv, IDataTrunk header, UnsignedDataInput inStream) throws IOException {
         if (header.getDataSize() > MAX_SCRIPT_DATASIZE){ 
             throw new IllegalArgumentException("ScriptData is too big to analysis, maxScriptSize is " +  MAX_SCRIPT_DATASIZE);
         }

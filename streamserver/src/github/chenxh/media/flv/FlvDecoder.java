@@ -5,12 +5,13 @@ import github.chenxh.media.UnsupportMediaTypeException;
 import github.chenxh.media.flv.impl.TagHeadImpl;
 import github.chenxh.media.flv.impl.TagImpl;
 import github.chenxh.media.flv.script.FlvMetaData;
+import github.chenxh.media.flv.script.KeyFrames;
+import github.chenxh.media.flv.tags.KeyFrameVisitor;
 import github.chenxh.media.flv.tags.MetaDataVisitor;
 import github.chenxh.media.flv.tags.TagDataVistorAdapter;
 
 import java.io.EOFException;
 import java.io.IOException;
-import java.io.InputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,17 +26,6 @@ public class FlvDecoder {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     /**
-     * 对文件进行解码，获取文件的元数据
-     * 
-     * @param inStream
-     * @return
-     * @throws IOException 
-     */
-    public FlvMetaData decode(InputStream inStream) throws IOException {
-        return decode(new UnsignedDataInput(inStream));
-    }
-
-    /**
      * 读取 flv 媒体信息，
      * 
      * inStream 当前
@@ -43,31 +33,29 @@ public class FlvDecoder {
      * @return
      * @throws IOException
      */
-    public FlvMetaData decode(UnsignedDataInput inStream) throws IOException {
+    public FlvMetaData decodeMetaData(UnsignedDataInput inStream) throws IOException {
         MetaDataVisitor metaDataVisitor = new MetaDataVisitor();
-        decode(inStream, metaDataVisitor);
+        decode(inStream, null, metaDataVisitor);
 
         return metaDataVisitor.getMetaData();
     }
 
-    public FlvSignature decode(UnsignedDataInput inStream, IDataVisitor dataVisitor) throws IOException {
-        // 读取 flv 头
-        IFileHeadDataVisitor headDataVisitor = null;
-        if (dataVisitor instanceof IFileHeadDataVisitor) {
-            headDataVisitor = (IFileHeadDataVisitor)dataVisitor;
-        }
+    /**
+     * 从各个  Tag 中生成关键帧
+     * 
+     * @param inStream
+     * @return
+     * @throws IOException
+     */
+    public KeyFrames decodeKeyFrames(UnsignedDataInput inStream) throws IOException  {
+        KeyFrameVisitor frameVisitor = new KeyFrameVisitor();
 
-        // 读取 flv tag 列表
-        ITagDataVistor tagDataVisitor = null;
-        if (dataVisitor instanceof ITagDataVistor) {
-            tagDataVisitor = (ITagDataVistor) dataVisitor;
-        }
-        
-        return decode(inStream, tagDataVisitor, headDataVisitor);
+        decode(inStream, null, frameVisitor);
+        return frameVisitor.getKeyFrames();
     }
-
+    
     public FlvSignature decode(UnsignedDataInput inStream,
-            ITagDataVistor tagDataVisitor, IFileHeadDataVisitor headDataVisitor) throws IOException, UnsupportMediaTypeException, EOFException {
+            IFileHeadDataVisitor headDataVisitor, ITagDataVistor tagDataVisitor) throws IOException, UnsupportMediaTypeException, EOFException {
 
         // 读取  flv 头部内容
         if (null == headDataVisitor) {
@@ -90,7 +78,7 @@ public class FlvDecoder {
         TagImpl curTag = null;
         do {
             // read tag
-            curTag = readTag(inStream, tagDataVisitor);
+            curTag = readTag(inStream, tagDataVisitor, header);
             if (null == curTag) {
                 break;
             }
@@ -137,10 +125,11 @@ public class FlvDecoder {
      * 读取下一个 Tag 头部信息
      * 
      * @param inStream
+     * @param flv TODO
      * @return null if no another datas
      * @throws IOException 
      */
-    private TagImpl readTag(UnsignedDataInput inStream, ITagDataVistor dataVisitor) throws IOException {
+    private TagImpl readTag(UnsignedDataInput inStream, ITagDataVistor dataVisitor, FlvSignature flv) throws IOException {
         int tagType = inStream.read();
         if (-1 == tagType) { // 已经到文件末尾了
             return  null;
@@ -155,7 +144,7 @@ public class FlvDecoder {
         TagHeadImpl head = new TagHeadImpl(tagType, dataSize, realTimestamp, streamId);
 
         // read tag data
-        ITagData data = head.readData(dataVisitor, inStream);
+        ITagData data = head.readData(flv, dataVisitor, inStream);
 
         return new TagImpl(head, data);
     }

@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import github.chenxh.media.IDataTrunk;
 import github.chenxh.media.UnsignedDataInput;
+import github.chenxh.media.flv.FlvSignature;
 import github.chenxh.media.flv.ITagTrunk;
 import github.chenxh.media.flv.ITagData;
 import github.chenxh.media.flv.ITagDataVistor;
@@ -17,22 +18,22 @@ public class TagDataVistorAdapter  implements ITagDataVistor {
     }
 
     @Override
-    public ITagData readScriptData(IDataTrunk header, UnsignedDataInput inStream) throws IOException {
+    public ITagData readScriptData(FlvSignature flv, IDataTrunk header, UnsignedDataInput inStream) throws IOException {
         return skipDatas(header, inStream);
     }
 
     @Override
-    public ITagData readAudioData(IDataTrunk header, UnsignedDataInput inStream) throws IOException {
+    public ITagData readAudioData(FlvSignature flv, IDataTrunk header, UnsignedDataInput inStream) throws IOException {
         return skipDatas(header, inStream);
     }
 
     @Override
-    public ITagData readOtherData(IDataTrunk header, UnsignedDataInput inStream) throws IOException {
+    public ITagData readOtherData(FlvSignature flv, IDataTrunk header, UnsignedDataInput inStream) throws IOException {
         return skipDatas(header, inStream);
     }
 
     @Override
-    public ITagData readVideoData(ITagHead header, UnsignedDataInput inStream) throws IOException {
+    public ITagData readVideoData(FlvSignature signature, ITagHead header, UnsignedDataInput inStream) throws IOException {
         return skipDatas(header, inStream);
     }
 

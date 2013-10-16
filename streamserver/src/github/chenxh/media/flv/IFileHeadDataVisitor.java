@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import github.chenxh.media.UnsignedDataInput;
 
-public interface IFileHeadDataVisitor extends IDataVisitor {
+public interface IFileHeadDataVisitor {
     /**
      * 读取  FLV 文件头
      * 
