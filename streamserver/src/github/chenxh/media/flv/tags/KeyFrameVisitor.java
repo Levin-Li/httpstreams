@@ -60,7 +60,7 @@ public class KeyFrameVisitor extends TagDataVistorAdapter {
     }
 
     private boolean isInited() {
-        return this.signature == null;
+        return this.signature != null;
     }
 
     @Override
