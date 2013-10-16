@@ -2,12 +2,9 @@ package github.chenxh.media.flv;
 
 import github.chenxh.media.UnsignedDataInput;
 import github.chenxh.media.flv.script.KeyFrames;
-import github.chenxh.media.flv.tags.KeyFrameVisitor;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 public class TestKeyFrames {
     public static void main(String[] args) throws IOException {
