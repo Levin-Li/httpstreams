@@ -82,7 +82,7 @@ public class FlvMetaData implements ITagData {
         
         long[] positions = getFilePositions();
         for (int i = 0; i < positions.length; i++) {
-            if (position <= positions[i]) {
+            if (targetPosition <= positions[i]) {
                 targetPosition = positions[i];
             } else {
                 break;

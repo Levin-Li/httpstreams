@@ -243,7 +243,7 @@ public class MetaDataVisitor extends TagDataVistorAdapter {
 
     @Override
     public boolean interruptAfterTag(ITagTrunk tag) throws IOException, EOFException {
-        return !interruptAfterFirstTag && null != metaData;
+        return interruptAfterFirstTag || null != metaData;
     }
 
     public FlvMetaData getMetaData() {
