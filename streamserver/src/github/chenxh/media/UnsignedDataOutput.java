@@ -1,5 +1,6 @@
 package github.chenxh.media;
 
+import java.io.DataOutputStream;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -65,6 +66,46 @@ public class UnsignedDataOutput extends FilterOutputStream {
         out.write((int)((v >>>  0) & 0xFF));
 
         incCount(4);
+    }
+
+    private byte writeBuffer[] = new byte[8];
+    /**
+     * Writes a <code>long</code> to the underlying output stream as eight
+     * bytes, high byte first. In no exception is thrown, the counter 
+     * <code>written</code> is incremented by <code>8</code>.
+     *
+     * @param      v   a <code>long</code> to be written.
+     * @exception  IOException  if an I/O error occurs.
+     * @see        java.io.FilterOutputStream#out
+     */
+    public final void writeLong(long v) throws IOException {
+        writeBuffer[0] = (byte)(v >>> 56);
+        writeBuffer[1] = (byte)(v >>> 48);
+        writeBuffer[2] = (byte)(v >>> 40);
+        writeBuffer[3] = (byte)(v >>> 32);
+        writeBuffer[4] = (byte)(v >>> 24);
+        writeBuffer[5] = (byte)(v >>> 16);
+        writeBuffer[6] = (byte)(v >>>  8);
+        writeBuffer[7] = (byte)(v >>>  0);
+        out.write(writeBuffer, 0, 8);
+    incCount(8);
+    }
+
+    /**
+     * Converts the double argument to a <code>long</code> using the 
+     * <code>doubleToLongBits</code> method in class <code>Double</code>, 
+     * and then writes that <code>long</code> value to the underlying 
+     * output stream as an 8-byte quantity, high byte first. If no 
+     * exception is thrown, the counter <code>written</code> is 
+     * incremented by <code>8</code>.
+     *
+     * @param      v   a <code>double</code> value to be written.
+     * @exception  IOException  if an I/O error occurs.
+     * @see        java.io.FilterOutputStream#out
+     * @see        java.lang.Double#doubleToLongBits(double)
+     */
+    public final void writeDouble(double v) throws IOException{
+        writeLong(Double.doubleToLongBits(v));
     }
 
     @Override

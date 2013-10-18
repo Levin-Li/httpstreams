@@ -5,7 +5,7 @@ import github.chenxh.media.UnsignedDataOutput;
 import github.chenxh.media.flv.FlvDecoder;
 import github.chenxh.media.flv.FlvEncoder;
 import github.chenxh.media.flv.FlvSignature;
-import github.chenxh.media.flv.script.FlvMetaData;
+import github.chenxh.media.flv.script.metadata.FlvMetaData;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -31,7 +31,7 @@ public class FlvStreamServlet extends HttpServlet {
     protected long getLastModified(HttpServletRequest req) {
         return System.currentTimeMillis();
     }
-    
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String uri = req.getRequestURI().substring(appUriPrefix.length());
@@ -81,8 +81,8 @@ public class FlvStreamServlet extends HttpServlet {
                     
                     // metadata
                     //   tag size
-                    //   int tagSize = encoder.encodeTag(metaData, dataOut);
-                    //dataOut.writeUI32(tagSize);
+                    int tagSize = encoder.encodeMetaData(metaData, dataOut);
+                    dataOut.writeUI32(tagSize);
                     
                     directOutput(resp, source, position);
                 }

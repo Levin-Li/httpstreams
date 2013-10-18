@@ -1,6 +1,6 @@
 package github.chenxh.media.flv.script.metadata;
 
-import github.chenxh.media.flv.script.EcmaArray;
+import github.chenxh.media.flv.script.EcmaObject;
 import github.chenxh.media.flv.script.StrictArray;
 
 import org.apache.commons.lang.ArrayUtils;
@@ -14,7 +14,7 @@ public class KeyFrames {
      * @param position
      * @param time
      */
-    public static void appendKeyFrame(EcmaArray keyFrams, long position, double time) {
+    public static void appendKeyFrame(EcmaObject keyFrams, long position, double time) {
         ensureNotNull(keyFrams);
 
         StrictArray times = keyFrams.getStrictArray("times");
@@ -32,7 +32,7 @@ public class KeyFrames {
         times.add(time);
     }
 
-    public static double[] getTimes(EcmaArray keyFrams) {
+    public static double[] getTimes(EcmaObject keyFrams) {
         ensureNotNull(keyFrams);
 
         StrictArray times = keyFrams.getStrictArray("times");
@@ -40,7 +40,7 @@ public class KeyFrames {
                 : ArrayUtils.EMPTY_DOUBLE_ARRAY;
     }
 
-    public static long[] getFilepositions(EcmaArray keyFrams) {
+    public static long[] getFilepositions(EcmaObject keyFrams) {
         ensureNotNull(keyFrams);
 
         StrictArray positions = keyFrams.getStrictArray("filepositions");
@@ -49,14 +49,14 @@ public class KeyFrames {
                 : ArrayUtils.EMPTY_LONG_ARRAY;
     }
     
-    private static void ensureNotNull(EcmaArray object) {
+    private static void ensureNotNull(Object object) {
         if (null == object) {
             throw new NullPointerException("EcmaArray Should not be Null");
         }
     }
     
     
-    private EcmaArray object = new EcmaArray();
+    private EcmaObject object = new EcmaObject();
 
     public double[] getTimes() {
         return getTimes(object);

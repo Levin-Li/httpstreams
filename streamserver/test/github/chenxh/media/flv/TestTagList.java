@@ -1,7 +1,7 @@
 package github.chenxh.media.flv;
 
 import github.chenxh.media.UnsignedDataInput;
-import github.chenxh.media.flv.script.KeyFrames;
+import github.chenxh.media.flv.script.metadata.KeyFrames;
 import github.chenxh.media.flv.tags.TagHeadVisitor;
 
 import java.io.File;

@@ -2,8 +2,8 @@ package github.chenxh.media.flv.script.metadata;
 
 import github.chenxh.media.flv.FlvSignature;
 import github.chenxh.media.flv.ITagData;
-import github.chenxh.media.flv.script.CuePoint;
 import github.chenxh.media.flv.script.EcmaArray;
+import github.chenxh.media.flv.script.EcmaObject;
 import github.chenxh.media.flv.script.StrictArray;
 import github.chenxh.media.flv.script.StrictArray.ITypeConverter;
 
@@ -20,7 +20,7 @@ import org.apache.commons.lang.ArrayUtils;
  */
 public class FlvMetaData implements ITagData {
     private FlvSignature signature;
-    private EcmaArray object;
+    private EcmaArray rawValue;
 
     /**
      * 可能为空
@@ -29,7 +29,7 @@ public class FlvMetaData implements ITagData {
     
     private FlvMetaData(FlvSignature signature, EcmaArray object) {
         this.signature = signature;
-        this.object = object;
+        this.rawValue = object;
     }
 
     public static FlvMetaData parseEcmaArray(FlvSignature signature, EcmaArray object){
@@ -46,12 +46,16 @@ public class FlvMetaData implements ITagData {
     
     public boolean hasKeyframes() {
         return getBoolean("hasKeyframes")
-         && null != getEcmaArray("keyframes");
+         && null != getKeyFramesObject();
+    }
+
+    private EcmaObject getKeyFramesObject() {
+        return getEcmaObject("keyframes");
     }
 
     public long[] getFilePositions(){
         if (hasKeyframes()) {
-            return KeyFrames.getFilepositions(getEcmaArray("keyframes"));
+            return KeyFrames.getFilepositions(getKeyFramesObject());
         } else {
             return ArrayUtils.EMPTY_LONG_ARRAY;
         }
@@ -101,7 +105,7 @@ public class FlvMetaData implements ITagData {
     
     public double[] getTimes(){
         if (hasKeyframes()) {
-            return KeyFrames.getTimes(getEcmaArray("keyframes"));
+            return KeyFrames.getTimes(getKeyFramesObject());
         } else {
             return ArrayUtils.EMPTY_DOUBLE_ARRAY;
         }
@@ -121,12 +125,7 @@ public class FlvMetaData implements ITagData {
                 public CuePoint convert(Object rawValue) {
                     EcmaArray value = (EcmaArray)rawValue;
 
-                    String name = value.getString("name");
-                    double time = value.getDouble("time");
-                    EcmaArray params = value.getEcmaArray("parameters");
-                    String type = value.getString("type");
-
-                    return new CuePoint(name, time, params, type);
+                    return new CuePoint(value);
                 }
             }, CuePoint.class);
             
@@ -175,38 +174,42 @@ public class FlvMetaData implements ITagData {
     // 基本方法
     // -----------------------------------------------------
     public boolean getBoolean(String key) {
-        return object.getBoolean(key);
+        return rawValue.getBoolean(key);
     }
     
     public String getString(String key) {
-        return object.getString(key);
+        return rawValue.getString(key);
     }
     
     public Number getNumber(String key) {
-        return object.getNumber(key);
+        return rawValue.getNumber(key);
     }
     
     public int getInt(String key) {
-        return object.getInt(key);
+        return rawValue.getInt(key);
     }
 
     public double getDouble(String key) {
-        return object.getDouble(key);
+        return rawValue.getDouble(key);
     }
     
     public long getLong(String key) {
-        return object.getLong(key);
+        return rawValue.getLong(key);
     }
 
     public Timestamp getTimestamp(String key) {
-        return object.getTimestamp(key);
+        return rawValue.getTimestamp(key);
     }
     public StrictArray getStrictArray(String key) {
-        return object.getStrictArray(key);
+        return rawValue.getStrictArray(key);
     }
     
     public EcmaArray getEcmaArray(String key) {
-        return object.getEcmaArray(key);
+        return rawValue.getEcmaArray(key);
+    }
+    
+    public EcmaObject getEcmaObject(String key) {
+        return rawValue.getEcmaObject(key);
     }
 
     // -----------------------------------------------
@@ -256,5 +259,9 @@ public class FlvMetaData implements ITagData {
 
     public void setRawBytes(byte[] rawBytes) {
         this.rawBytes = rawBytes;
+    }
+
+    public EcmaArray getRawValue() {
+        return rawValue;
     }
 }

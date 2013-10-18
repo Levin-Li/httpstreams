@@ -1,7 +1,7 @@
 package github.chenxh.media.flv;
 
 import github.chenxh.media.UnsignedDataInput;
-import github.chenxh.media.flv.script.FlvMetaData;
+import github.chenxh.media.flv.script.metadata.FlvMetaData;
 
 import java.io.File;
 import java.io.IOException;

@@ -1,4 +1,7 @@
-package github.chenxh.media.flv.script;
+package github.chenxh.media.flv.script.metadata;
+
+import github.chenxh.media.flv.script.AbstractDynamicObject;
+import github.chenxh.media.flv.script.EcmaArray;
 
 
 /**
@@ -19,6 +22,14 @@ public class CuePoint {
      */
     private String type;
 
+    public CuePoint (EcmaArray octstream) {
+
+        this.name = octstream.getString("name");
+        this.time = octstream.getDouble("time");
+        this.parameters = octstream.getEcmaArray("parameters");
+        this.type = octstream.getString("type");
+    }
+
     public CuePoint(String name, double time, EcmaArray parameters, String type) {
         this.name = name;
         this.time = time;
@@ -36,7 +47,7 @@ public class CuePoint {
     public double getTime() {
         return time;
     }
-    public EcmaArray getParams() {
+    public AbstractDynamicObject getParams() {
         return parameters;
     }
     
