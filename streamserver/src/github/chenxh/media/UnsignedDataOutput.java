@@ -1,6 +1,5 @@
 package github.chenxh.media;
 
-import java.io.DataOutputStream;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
