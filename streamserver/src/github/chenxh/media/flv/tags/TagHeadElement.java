@@ -9,7 +9,7 @@ import github.chenxh.media.flv.ITagTrunk;
 import github.chenxh.media.flv.ITagData;
 import github.chenxh.media.flv.ITagDataVistor;
 import github.chenxh.media.flv.ITagHead;
-import github.chenxh.media.flv.impl.TagHeadImpl;
+import github.chenxh.media.flv.struct.TagHeadImpl;
 
 /**
  * 访问者模式的访问元素

@@ -2,9 +2,9 @@ package github.chenxh.media.flv;
 
 import github.chenxh.media.UnsignedDataInput;
 import github.chenxh.media.UnsupportMediaTypeException;
-import github.chenxh.media.flv.impl.TagImpl;
 import github.chenxh.media.flv.script.FlvMetaData;
 import github.chenxh.media.flv.script.KeyFrames;
+import github.chenxh.media.flv.struct.TagImpl;
 import github.chenxh.media.flv.tags.KeyFrameVisitor;
 import github.chenxh.media.flv.tags.MetaDataVisitor;
 import github.chenxh.media.flv.tags.TagHeadElement;

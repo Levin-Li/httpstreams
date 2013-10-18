@@ -1,8 +1,8 @@
 package github.chenxh.media.flv;
 
 import github.chenxh.media.UnsignedDataOutput;
-import github.chenxh.media.flv.impl.TagHeadImpl;
 import github.chenxh.media.flv.script.FlvMetaData;
+import github.chenxh.media.flv.struct.TagHeadImpl;
 
 import java.io.IOException;
 
