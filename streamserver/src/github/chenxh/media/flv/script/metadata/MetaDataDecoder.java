@@ -79,7 +79,7 @@ public class MetaDataDecoder {
         do {
             String key = readString(inStream);
             Object value = readObject(inStream);
-            logger.info("Entry[{}={}]", key, value);
+            logger.debug("Entry[{}={}]", key, value);
 
             // 009 Ω·Œ≤ 
             if ( key.length() == 0 
