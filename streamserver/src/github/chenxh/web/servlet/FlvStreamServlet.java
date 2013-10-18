@@ -4,6 +4,7 @@ import github.chenxh.media.UnsignedDataInput;
 import github.chenxh.media.UnsignedDataOutput;
 import github.chenxh.media.flv.FlvDecoder;
 import github.chenxh.media.flv.FlvEncoder;
+import github.chenxh.media.flv.FlvSignature;
 import github.chenxh.media.flv.script.FlvMetaData;
 
 import java.io.BufferedInputStream;
@@ -34,10 +35,9 @@ public class FlvStreamServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String uri = req.getRequestURI().substring(appUriPrefix.length());
-        String filepath = getServletContext().getRealPath(uri);
-        logger.debug("download:{}", filepath);
+        File source = new File(rootPath, uri);
+        logger.debug("download:{}", source.getAbsoluteFile());
 
-        File source = new File(filepath);
         if (source.exists()) {
             resp.setContentType("video/x-flv");
             write(req, resp, source);
@@ -75,15 +75,18 @@ public class FlvStreamServlet extends HttpServlet {
                     return;
                 } else {
                     // flv head 
-                    int flvSignatureSize = encoder.encodeSignature(metaData.getSignature(), dataOut);
+                    encoder.encodeSignature(metaData.getSignature(), dataOut);
                     
                     // pre tag size
-                    dataOut.writeUI32(flvSignatureSize);
+                    // metadata
+                    dataOut.writeUI32(FlvSignature.MIN_HEAD_SIZE);
+                    //int tagSize = encoder.encodeTag(metaData, dataOut);
                     
-                    // data tags
+                    // pre tags ize
+                    //dataOut.writeUI32(tagSize);
                     directOutput(resp, source, position);
                 }
-                
+
                 dataIn.close();
             } finally {
                 IOUtils.closeQuietly(dataIn);
@@ -136,12 +139,19 @@ public class FlvStreamServlet extends HttpServlet {
     }
 
     private String appUriPrefix;
+    private String rootPath;
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         
-        String app = config.getInitParameter("app");
-        appUriPrefix = config.getServletContext().getContextPath() + "/" + app;
+        String alias = config.getInitParameter("alias");
+        appUriPrefix = config.getServletContext().getContextPath() + "/" + alias;
+        
+        String rawPath = config.getInitParameter("path");
+        rootPath = config.getServletContext().getRealPath(rawPath);
+        
+        
+        logger.warn("streamServer started, [alias={}, root={}]", alias, rootPath);
     }
     
     /**

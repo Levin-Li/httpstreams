@@ -8,10 +8,13 @@
         <servlet-name>DemoFlvStreamServlet</servlet-name>
         <servlet-class>github.chenxh.web.servlet.FlvStreamServlet</servlet-class>
         <init-param>
-            <param-name>app</param-name>
+            <param-name>alias</param-name>
             <param-value>demo</param-value>
         </init-param>
-        
+        <init-param>
+            <param-name>path</param-name>
+            <param-value>/test</param-value>
+        </init-param>
     </servlet>
 
     <servlet-mapping>
