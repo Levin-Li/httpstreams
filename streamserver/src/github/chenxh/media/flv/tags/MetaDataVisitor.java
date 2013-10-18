@@ -59,6 +59,7 @@ public class MetaDataVisitor extends TagDataVistorAdapter {
         // 对脚本数据进行解析
         metaData = parseMetaData(flv, script);
         metaData.setRawBytes(script);
+        metaData.setSignature(flv);
 
         return metaData;
     }

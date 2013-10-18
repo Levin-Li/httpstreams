@@ -264,4 +264,8 @@ public class FlvMetaData implements ITagData {
     public EcmaArray getRawValue() {
         return rawValue;
     }
+
+    public void setSignature(FlvSignature signature) {
+        this.signature = signature;
+    }
 }

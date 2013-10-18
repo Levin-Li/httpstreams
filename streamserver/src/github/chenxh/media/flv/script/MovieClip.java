@@ -12,6 +12,10 @@ public class MovieClip {
         return url;
     }
 
+    public String stringValue() {
+        return null != url ? url : "";
+    }
+    
     @Override
     public String toString() {
         return String.valueOf(url);

@@ -2,6 +2,7 @@ package github.chenxh.media.flv;
 
 import github.chenxh.media.UnsignedDataOutput;
 import github.chenxh.media.flv.script.metadata.FlvMetaData;
+import github.chenxh.media.flv.script.metadata.MetaDataEncoder;
 import github.chenxh.media.flv.struct.TagHeadImpl;
 
 import java.io.IOException;
@@ -38,7 +39,7 @@ public class FlvEncoder {
      * @throws IOException
      */
     public int encodeMetaData(FlvMetaData metaData, UnsignedDataOutput output) throws IOException{
-        byte[] bytes = metaData.getRawBytes();
+        byte[] bytes = new MetaDataEncoder().encode(metaData);
 
         TagHeadImpl head = new TagHeadImpl();
         head.init(ITagTrunk.SCRIPT_DATA, bytes.length, 0, 0);
@@ -48,6 +49,15 @@ public class FlvEncoder {
     
     public int encodeTag(ITagHead head, byte[] bytes, UnsignedDataOutput output) throws IOException{
         long start = output.writen();
+        encodeTagHead(head, output);
+        
+        // Data
+        output.write(bytes);
+        
+        return (int)(output.writen() - start);
+    }
+
+    private void encodeTagHead(ITagHead head, UnsignedDataOutput output) throws IOException {
 
         // TagType
         output.writeUI8(head.getTagType());
@@ -61,10 +71,5 @@ public class FlvEncoder {
         
         // streamId
         output.writeUI24(head.getStreamId());
-        
-        // Data
-        output.write(bytes);
-        
-        return (int)(output.writen() - start);
     }
 }
