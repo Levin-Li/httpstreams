@@ -85,6 +85,7 @@ a.player img {
 
 <!-- this script block will install Flowplayer inside previous A tag -->
 <script>
+var start = "685172112";
 var info = document.getElementById("info");
 flowplayer("player", "http://releases.flowplayer.org/swf/flowplayer-3.2.16.swf", {
     plugins: {
@@ -94,8 +95,8 @@ flowplayer("player", "http://releases.flowplayer.org/swf/flowplayer-3.2.16.swf",
     },
     
     clip: {
-        url: 'demo/test.flv?r=' + Math.random(),
-        start:60 * 24,
+        url: '/flvx/demo/demo.flv?r=' + Math.random() + "&start=" + start,
+        // start:start,
         provider: 'pseudo',
 
         // you can do different things on each cuepoint by checking the time
