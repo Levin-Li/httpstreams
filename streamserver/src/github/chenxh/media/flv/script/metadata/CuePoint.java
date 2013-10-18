@@ -30,13 +30,6 @@ public class CuePoint {
         this.type = octstream.getString("type");
     }
 
-    public CuePoint(String name, double time, EcmaArray parameters, String type) {
-        this.name = name;
-        this.time = time;
-        this.parameters = parameters;
-        this.type = type;
-    }
-    
     public String getType() {
         return type;
     }
