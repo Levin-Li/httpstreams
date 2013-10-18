@@ -15,6 +15,7 @@ public abstract class AbstractDynamicObject {
         private String key;
         private Object value;
         
+        // °üÄÚ¿ÉÐ´
         void init(String key, Object value) {
             this.key = key;
             this.value = value;
