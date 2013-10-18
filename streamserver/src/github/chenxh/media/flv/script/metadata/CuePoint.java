@@ -1,6 +1,5 @@
 package github.chenxh.media.flv.script.metadata;
 
-import github.chenxh.media.flv.script.AbstractDynamicObject;
 import github.chenxh.media.flv.script.EcmaArray;
 
 
