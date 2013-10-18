@@ -2,30 +2,36 @@ package github.chenxh.media.flv;
 
 import github.chenxh.media.UnsignedDataInput;
 import github.chenxh.media.flv.script.KeyFrames;
+import github.chenxh.media.flv.tags.TagHeadVisitor;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
-public class TestKeyFrames  {
-    
-
+public class TestTagList {
     public static void main(String[] args) throws IOException {
         FlvDecoder decoder = new FlvDecoder();
 
         File file = new File(ITestFiles.ROOT_DIR, ITestFiles.FILE);
 
         UnsignedDataInput inStream = null;
+        TagHeadVisitor tagHeadVisitor = new TagHeadVisitor();
         try {
             inStream = new UnsignedDataInput(file);
-            KeyFrames keyFrames = decoder.decodeKeyFrames(inStream);
+            decoder.decode(inStream, null, tagHeadVisitor);
             
-            System.out.println(keyFrames);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             if (null != inStream) {
                 inStream.close();
             }
+        }
+        
+        System.out.println();
+        List<ITagHead> tagHeads = tagHeadVisitor.getTagHeads();
+        for (ITagHead tag : tagHeads) {
+            System.out.println(tag);
         }
     }
 }

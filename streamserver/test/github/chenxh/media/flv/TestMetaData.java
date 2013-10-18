@@ -10,7 +10,7 @@ public class TestMetaData {
     public static void main(String[] args) throws IOException {
         FlvDecoder decoder = new FlvDecoder();
 
-        File file = new File("C:/thunisoft/media/flv/test", "cuepoints.flv");
+        File file = new File(ITestFiles.ROOT_DIR, ITestFiles.FILE);
 
         UnsignedDataInput dataInput = null;
         try {
