@@ -41,12 +41,12 @@ public abstract class AbstractDynamicObject {
         keyList = new LinkedList<String>();
     }
     
-    public void put(String key, Object value) {
-        if (entry.containsKey(key)) {
-            entry.put(key, value);
+    public void set(String name, Object value) {
+        if (entry.containsKey(name)) {
+            entry.put(name, value);
         } else {
-            keyList.add(key);
-            entry.put(key, value);
+            keyList.add(name);
+            entry.put(name, value);
         }
     }
 

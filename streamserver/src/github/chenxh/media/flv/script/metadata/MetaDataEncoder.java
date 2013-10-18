@@ -36,7 +36,8 @@ public class MetaDataEncoder {
         writeObject("onMetaData", target);
 
         // metadata ecmaArray
-        writeObject(metaData.getRawValue(), target);
+        metaData.set(FlvMetaData.P_METADATA_CREATOR, "chenxiuheng@gmail.com");
+        writeObject(metaData.getRawObject(), target);
 
         // End
         target.write(OBJECT_END);

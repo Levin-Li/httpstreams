@@ -86,7 +86,7 @@ public class MetaDataDecoder {
                     && ScriptDataType.END == value) {
                 break;
             } else {
-                array.put(key, value);
+                array.set(key, value);
             }
         } while(true);
     }

@@ -19,6 +19,21 @@ import org.apache.commons.lang.ArrayUtils;
  *
  */
 public class FlvMetaData implements ITagData {
+    public static final String P_VIDEOSIZE = "videosize";
+    public static final String P_DURATION = "duration";
+    public static final String P_AUDIOSAMPLERATE = "audiosamplerate";
+    public static final String P_FRAMERATE = "framerate";
+    public static final String P_HEIGHT = "height";
+    public static final String P_WIDTH = "width";
+    public static final String P_HAS_METADATA = "hasMetadata";
+    public static final String P_HAS_AUDIO = "hasAudio";
+    public static final String P_HAS_VIDEO = "hasVideo";
+    public static final String P_CUEPOINTS = "cuePoints";
+    public static final String P_HAS_CUEPOINTS = "hasCuePoints";
+    public static final String P_KEYFRAMES = "keyframes";
+    public static final String P_HAS_KEYFRAMES = "hasKeyframes";
+    public static final String P_METADATA_CREATOR = "metadatacreator";
+
     private FlvSignature signature;
     private EcmaArray rawValue;
 
@@ -41,16 +56,16 @@ public class FlvMetaData implements ITagData {
     // ----------------------------------------------------
     
     public String getMetaDataCreator() {
-        return getString("metadatacreator");
+        return getString(P_METADATA_CREATOR);
     }
     
     public boolean hasKeyframes() {
-        return getBoolean("hasKeyframes")
+        return getBoolean(P_HAS_KEYFRAMES)
          && null != getKeyFramesObject();
     }
 
     private EcmaObject getKeyFramesObject() {
-        return getEcmaObject("keyframes");
+        return getEcmaObject(P_KEYFRAMES);
     }
 
     public long[] getFilePositions(){
@@ -112,13 +127,13 @@ public class FlvMetaData implements ITagData {
     }
 
     public boolean hasCuePoints() {
-        return getBoolean("hasCuePoints")
-        && null != getStrictArray("cuePoints");
+        return getBoolean(P_HAS_CUEPOINTS)
+        && null != getStrictArray(P_CUEPOINTS);
     }
     
     public CuePoint[] getCuePoints(){
         if (hasCuePoints()) {
-            StrictArray cuePoints = getStrictArray("cuePoints");
+            StrictArray cuePoints = getStrictArray(P_CUEPOINTS);
 
             return cuePoints.toArray(new ITypeConverter<CuePoint>(){
                 @Override
@@ -135,44 +150,48 @@ public class FlvMetaData implements ITagData {
     }
     
     public boolean hasVideo() {
-        return getBoolean("hasVideo");
+        return getBoolean(P_HAS_VIDEO);
     }
     
     public boolean hasAudio() {
-        return getBoolean("hasAudio");
+        return getBoolean(P_HAS_AUDIO);
     }
     
     public boolean hasMetadata() {
-        return getBoolean("hasMetadata");
+        return getBoolean(P_HAS_METADATA);
     }
     
     public int getWidth() {
-        return getInt("width");
+        return getInt(P_WIDTH);
     }
     
     public int getHeight() {
-        return getInt("height");
+        return getInt(P_HEIGHT);
     }
     
     public int getFramerate() {
-        return getInt("framerate");
+        return getInt(P_FRAMERATE);
     }
     
     public int getAudiosamplerate() {
-        return getInt("audiosamplerate");
+        return getInt(P_AUDIOSAMPLERATE);
     }
     
     public double getDuration() {
-        return getDouble("duration");
+        return getDouble(P_DURATION);
     }
 
     public double getVideoSize() {
-        return getDouble("videosize");
+        return getDouble(P_VIDEOSIZE);
     }
 
     // -----------------------------------------------------
     // 基本方法
     // -----------------------------------------------------
+    public void set(String key, Object value) {
+        rawValue.set(key, value);
+    }
+    
     public boolean getBoolean(String key) {
         return rawValue.getBoolean(key);
     }
@@ -261,7 +280,7 @@ public class FlvMetaData implements ITagData {
         this.rawBytes = rawBytes;
     }
 
-    public EcmaArray getRawValue() {
+    public EcmaArray getRawObject() {
         return rawValue;
     }
 

@@ -23,8 +23,8 @@ public class KeyFrames {
         if (null == times) {
             times = new StrictArray();
             positions = new StrictArray();
-            keyFrams.put("times", times);
-            keyFrams.put("filepositions", positions);
+            keyFrams.set("times", times);
+            keyFrams.set("filepositions", positions);
         }
         
         // 追加到最后
