@@ -1,12 +1,13 @@
 package github.chenxh.media.flv.tags;
 
-import github.chenxh.media.IDataTrunk;
 import github.chenxh.media.UnsignedDataInput;
 import github.chenxh.media.flv.FlvSignature;
+import github.chenxh.media.flv.ITagHead;
 import github.chenxh.media.flv.ITagTrunk;
 import github.chenxh.media.flv.ITagData;
 import github.chenxh.media.flv.script.EcmaArray;
 import github.chenxh.media.flv.script.FlvMetaData;
+import github.chenxh.media.flv.script.MovieClip;
 import github.chenxh.media.flv.script.StrictArray;
 import github.chenxh.media.flv.script.ScriptDataType;
 
@@ -50,12 +51,13 @@ public class MetaDataVisitor extends TagDataVistorAdapter {
     public MetaDataVisitor(boolean interruptAfterFirstTag) {
         this.interruptAfterFirstTag = interruptAfterFirstTag;
     }
+
     @Override
-    public ITagData readScriptData(FlvSignature flv, IDataTrunk header, UnsignedDataInput inStream) throws IOException {
+    public ITagData readScriptData(FlvSignature flv, ITagHead header, UnsignedDataInput inStream) throws IOException {
         if (header.getDataSize() > MAX_SCRIPT_DATASIZE){ 
             throw new IllegalArgumentException("ScriptData is too big to analysis, maxScriptSize is " +  MAX_SCRIPT_DATASIZE);
         }
-        
+
         // 把所有脚本都读取出来
         // 避免多度或者少读，造成后面数据处理错误
         byte[] script = new byte[(int) header.getDataSize()];
@@ -63,7 +65,10 @@ public class MetaDataVisitor extends TagDataVistorAdapter {
         
         // 对脚本数据进行解析
         UnsignedDataInput scriptData = new UnsignedDataInput(new ByteArrayInputStream(script));
-        return metaData = parseMetaData(flv, scriptData);
+        metaData = parseMetaData(flv, scriptData);
+        metaData.setRawBytes(script);
+
+        return metaData;
     }
     
     private FlvMetaData parseMetaData(FlvSignature flv, UnsignedDataInput inStream) throws IOException{
@@ -191,7 +196,7 @@ public class MetaDataVisitor extends TagDataVistorAdapter {
     private Object readMovieClip(UnsignedDataInput inStream) throws IOException {
         // TODO 需要确认
         String movieClipPath = readString(inStream);
-        return movieClipPath;
+        return new MovieClip(movieClipPath);
     }
 
     private Object readNull(UnsignedDataInput inStream) {

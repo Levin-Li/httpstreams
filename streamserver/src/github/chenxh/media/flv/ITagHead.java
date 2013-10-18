@@ -8,4 +8,5 @@ public interface ITagHead extends IDataTrunk {
 
     public long getTimestamp();
 
+    public int getStreamId();
 }

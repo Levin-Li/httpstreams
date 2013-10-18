@@ -1,73 +1,38 @@
 package github.chenxh.media.flv.impl;
 
-import java.io.EOFException;
-import java.io.IOException;
-
-import github.chenxh.media.UnsignedDataInput;
-import github.chenxh.media.flv.FlvSignature;
-import github.chenxh.media.flv.ITagTrunk;
-import github.chenxh.media.flv.ITagData;
-import github.chenxh.media.flv.ITagDataVistor;
 import github.chenxh.media.flv.ITagHead;
 
 public class TagHeadImpl implements ITagHead {
+
     private static final int HEAD_SIZE = 11;
+
     private int tagType;
+
     private int dataSize;
+
     public long timestamp;
 
-    // always 0
     private int streamId;
 
-    
-    protected TagHeadImpl(){}
-    
-    public TagHeadImpl(int tagType,
-            int dataSize,
-            long timestamp,
-            int streamId) {
+    public TagHeadImpl() {
         super();
-        init(tagType, dataSize, timestamp, streamId);
     }
 
     /**
-     * Flv 文件中，这些内容保存在  11 字节中
-     * @param tagType    U8
-     * @param dataSize   U24
-     * @param timestamp  U24 + U8，其中 U8 为扩展位
-     * @param streamId   U8, 一直都是 0
+     * Flv 文件中，这些内容保存在 11 字节中
+     * 
+     * @param tagType U8
+     * @param dataSize U24
+     * @param timestamp U24 + U8，其中 U8 为扩展位
+     * @param streamId U8, 一直都是 0
      */
-    protected void init(int tagType, int dataSize, long timestamp, int streamId) {
+    public void init(int tagType, int dataSize, long timestamp, int streamId) {
         this.tagType = tagType;
         this.dataSize = dataSize;
         this.timestamp = timestamp;
         this.streamId = streamId;
     }
 
-    /**
-     * 
-     * @param flv TODO
-     * @param decoder
-     * @param dataInput
-     * @throws IOException 
-     * @throws EOFException 
-     */
-    public ITagData readData(FlvSignature flv, ITagDataVistor decoder, UnsignedDataInput dataInput) throws EOFException, IOException {
-        switch (getType()) {
-            case ITagTrunk.VIDEO:
-                return decoder.readVideoData(flv, this, dataInput);
-            case ITagTrunk.AUDIO:
-                return decoder.readAudioData(flv, this, dataInput);
-            case ITagTrunk.SCRIPT_DATA:
-                return decoder.readScriptData(flv, this, dataInput);
-            default:
-                return decoder.readOtherData(flv, this, dataInput);
-        }
-    }
-    
-    // -----------------------------------------------------
-    // getter/setter Method
-    // -----------------------------------------------------
     public int getStreamId() {
         return streamId;
     }
@@ -75,22 +40,17 @@ public class TagHeadImpl implements ITagHead {
     public long getTimestamp() {
         return timestamp;
     }
-    
-    // ------------------------------------------------------
-    // implements of interface Tag
-    // ------------------------------------------------------
-    
+
     @Override
-    public int getType() {
+    public int getTagType() {
         return tagType;
     }
-    
+
     @Override
     public long size() {
         return getHeadSize() + getDataSize();
     }
-    
-    
+
     @Override
     public long getHeadSize() {
         return HEAD_SIZE;
@@ -100,18 +60,19 @@ public class TagHeadImpl implements ITagHead {
     public long getDataSize() {
         return dataSize;
     }
-    
+
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder();
-        
+
         b.append("{");
-        b.append("[type:").append(getType()).append("]");
+        b.append("[type:").append(getTagType()).append("]");
         b.append(", [dataSize:").append(getDataSize()).append("]");
         b.append(", [timestamp:").append(getTimestamp()).append("]");
         b.append(", [streamId:").append(getStreamId()).append("]");
         b.append("}");
-        
+
         return b.toString();
     }
+
 }

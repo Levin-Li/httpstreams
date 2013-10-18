@@ -1,6 +1,5 @@
 package github.chenxh.media.flv;
 
-import github.chenxh.media.IDataTrunk;
 import github.chenxh.media.UnsignedDataInput;
 
 import java.io.EOFException;
@@ -10,11 +9,11 @@ public interface ITagDataVistor {
 
     public abstract ITagData readVideoData(FlvSignature flv, ITagHead header, UnsignedDataInput inStream) throws IOException, EOFException;
 
-    public abstract ITagData readAudioData(FlvSignature flv, IDataTrunk tagHeader, UnsignedDataInput inStream) throws IOException, EOFException;
+    public abstract ITagData readAudioData(FlvSignature flv, ITagHead tagHeader, UnsignedDataInput inStream) throws IOException, EOFException;
 
-    public abstract ITagData readScriptData(FlvSignature flv, IDataTrunk header, UnsignedDataInput inStream) throws IOException, EOFException;
+    public abstract ITagData readScriptData(FlvSignature flv, ITagHead header, UnsignedDataInput inStream) throws IOException, EOFException;
 
-    public abstract ITagData readOtherData(FlvSignature flv, IDataTrunk header, UnsignedDataInput inStream) throws IOException, EOFException;
+    public abstract ITagData readOtherData(FlvSignature flv, ITagHead header, UnsignedDataInput inStream) throws IOException, EOFException;
 
     /**
      * 在这个标签之后是否中断继续遍历

@@ -2,12 +2,12 @@ package github.chenxh.media.flv;
 
 import github.chenxh.media.UnsignedDataInput;
 import github.chenxh.media.UnsupportMediaTypeException;
-import github.chenxh.media.flv.impl.TagHeadImpl;
 import github.chenxh.media.flv.impl.TagImpl;
 import github.chenxh.media.flv.script.FlvMetaData;
 import github.chenxh.media.flv.script.KeyFrames;
 import github.chenxh.media.flv.tags.KeyFrameVisitor;
 import github.chenxh.media.flv.tags.MetaDataVisitor;
+import github.chenxh.media.flv.tags.TagHeadElement;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -160,10 +160,10 @@ public class FlvDecoder {
         int timstampExtended = inStream.readUI8();
         int streamId = inStream.readUI24();
         long realTimestamp = ((long)timstampExtended << 24) | timestamp;
-        TagHeadImpl head = new TagHeadImpl(tagType, dataSize, realTimestamp, streamId);
+        TagHeadElement head = new TagHeadElement(tagType, dataSize, realTimestamp, streamId);
 
         // read tag data
-        ITagData data = head.readData(flv, dataVisitor, inStream);
+        ITagData data = head.accept(flv, dataVisitor, inStream);
 
         return new TagImpl(head, data);
     }

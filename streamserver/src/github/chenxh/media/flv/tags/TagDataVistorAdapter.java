@@ -18,17 +18,17 @@ public class TagDataVistorAdapter  implements ITagDataVistor {
     }
 
     @Override
-    public ITagData readScriptData(FlvSignature flv, IDataTrunk header, UnsignedDataInput inStream) throws IOException {
+    public ITagData readScriptData(FlvSignature flv, ITagHead header, UnsignedDataInput inStream) throws IOException {
         return skipDatas(header, inStream);
     }
 
     @Override
-    public ITagData readAudioData(FlvSignature flv, IDataTrunk header, UnsignedDataInput inStream) throws IOException {
+    public ITagData readAudioData(FlvSignature flv, ITagHead header, UnsignedDataInput inStream) throws IOException {
         return skipDatas(header, inStream);
     }
 
     @Override
-    public ITagData readOtherData(FlvSignature flv, IDataTrunk header, UnsignedDataInput inStream) throws IOException {
+    public ITagData readOtherData(FlvSignature flv, ITagHead header, UnsignedDataInput inStream) throws IOException {
         return skipDatas(header, inStream);
     }
 
@@ -45,7 +45,7 @@ public class TagDataVistorAdapter  implements ITagDataVistor {
      * @return
      * @throws IOException
      */
-    private ITagData skipDatas(IDataTrunk header, UnsignedDataInput inStream) throws IOException {
+    protected ITagData skipDatas(IDataTrunk header, UnsignedDataInput inStream) throws IOException {
         inStream.skipBytes(header.getDataSize());
         return null;
     }

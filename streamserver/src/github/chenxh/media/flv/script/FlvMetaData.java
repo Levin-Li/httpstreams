@@ -19,6 +19,11 @@ public class FlvMetaData implements ITagData {
     private FlvSignature signature;
     private EcmaArray object;
 
+    /**
+     * ¿ÉÄÜÎª¿Õ
+     */
+    private byte[] rawBytes;
+    
     private FlvMetaData(FlvSignature signature, EcmaArray object) {
         this.signature = signature;
         this.object = object;
@@ -75,21 +80,20 @@ public class FlvMetaData implements ITagData {
     }
     
     public long getNearestPosition(long position) {
-        long targetPosition = -1;
+        long nearestPosition = -1;
         if (!hasKeyframes()) {
-            return targetPosition;
+            return nearestPosition;
         }
         
         long[] positions = getFilePositions();
         for (int i = 0; i < positions.length; i++) {
-            if (targetPosition <= positions[i]) {
-                targetPosition = positions[i];
-            } else {
+            if (positions[i] > position) {
                 break;
             }
+            nearestPosition = positions[i];
         }
 
-        return targetPosition;
+        return nearestPosition;
     }
     
     public double[] getTimes(){
@@ -241,5 +245,13 @@ public class FlvMetaData implements ITagData {
 
     public FlvSignature getSignature() {
         return signature;
+    }
+
+    public byte[] getRawBytes() {
+        return rawBytes;
+    }
+
+    public void setRawBytes(byte[] rawBytes) {
+        this.rawBytes = rawBytes;
     }
 }

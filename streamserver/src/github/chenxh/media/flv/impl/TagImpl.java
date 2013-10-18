@@ -40,8 +40,8 @@ public class TagImpl implements ITagTrunk {
     }
 
     @Override
-    public int getType() {
-        return head.getType();
+    public int getTagType() {
+        return head.getTagType();
     }
 
     @Override

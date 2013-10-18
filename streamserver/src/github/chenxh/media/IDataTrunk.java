@@ -34,5 +34,5 @@ public interface IDataTrunk {
      * type of tag
      * @return
      */
-    public abstract int getType();
+    public abstract int getTagType();
 }

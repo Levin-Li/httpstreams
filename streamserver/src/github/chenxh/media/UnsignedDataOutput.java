@@ -20,13 +20,30 @@ public class UnsignedDataOutput extends FilterOutputStream {
         incCount(1);
     }
 
+    public void writeUI8(long v) throws IOException{
+        out.write((int)((v >>>  0) & 0xFF));
+        incCount(1);
+    }
     public void writeUI16(int v) throws IOException{
         out.write((int)((v >>>  8) & 0xFF));
         out.write((int)((v >>>  0) & 0xFF));
         incCount(2);
     }
     
+    public void writeUI16(long v) throws IOException{
+        out.write((int)((v >>>  8) & 0xFF));
+        out.write((int)((v >>>  0) & 0xFF));
+        incCount(2);
+    }
+    
     public void writeUI24(int v) throws IOException{
+        out.write((int)((v >>> 16) & 0xFF));
+        out.write((int)((v >>>  8) & 0xFF));
+        out.write((int)((v >>>  0) & 0xFF));
+        incCount(3);
+    }
+    
+    public void writeUI24(long v) throws IOException{
         out.write((int)((v >>> 16) & 0xFF));
         out.write((int)((v >>>  8) & 0xFF));
         out.write((int)((v >>>  0) & 0xFF));
@@ -88,14 +105,14 @@ public class UnsignedDataOutput extends FilterOutputStream {
      * 
      * @return
      */
-    public int countOfOutput() {
+    public int writen() {
         return written;
     }
 
     /**
      * 重新计数
      */
-    public void resetOutputCount() {
+    public void resetWriten() {
         written = 0;
     }
 }

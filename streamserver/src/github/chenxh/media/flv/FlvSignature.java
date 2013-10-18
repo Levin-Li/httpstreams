@@ -103,7 +103,7 @@ public class FlvSignature implements IDataTrunk {
     }
 
     @Override
-    public int getType() {
+    public int getTagType() {
         return ITagTrunk.HEAD;
     }
 }
