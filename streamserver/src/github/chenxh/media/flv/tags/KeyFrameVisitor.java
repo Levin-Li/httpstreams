@@ -5,7 +5,7 @@ import github.chenxh.media.flv.FlvSignature;
 import github.chenxh.media.flv.ITagData;
 import github.chenxh.media.flv.ITagHead;
 import github.chenxh.media.flv.ITagTrunk;
-import github.chenxh.media.flv.script.KeyFrames;
+import github.chenxh.media.flv.script.metadata.KeyFrames;
 
 import java.io.EOFException;
 import java.io.IOException;

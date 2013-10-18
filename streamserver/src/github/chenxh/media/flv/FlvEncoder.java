@@ -1,14 +1,14 @@
 package github.chenxh.media.flv;
 
 import github.chenxh.media.UnsignedDataOutput;
-import github.chenxh.media.flv.script.FlvMetaData;
+import github.chenxh.media.flv.script.metadata.FlvMetaData;
 import github.chenxh.media.flv.struct.TagHeadImpl;
 
 import java.io.IOException;
 
 public class FlvEncoder {
     /**
-     * byte
+     * 写出 flv 文件头
      * @param signature
      * @return  how many bytes output
      * @throws IOException 
@@ -29,7 +29,15 @@ public class FlvEncoder {
         output.writeUI32(FlvSignature.MIN_HEAD_SIZE);
     }
     
-    public int encodeTag(FlvMetaData metaData, UnsignedDataOutput output) throws IOException{
+    /**
+     * 写出 scriptdata， 内容为 metadata 信息
+     * 
+     * @param metaData
+     * @param output
+     * @return
+     * @throws IOException
+     */
+    public int encodeMetaData(FlvMetaData metaData, UnsignedDataOutput output) throws IOException{
         byte[] bytes = metaData.getRawBytes();
 
         TagHeadImpl head = new TagHeadImpl();

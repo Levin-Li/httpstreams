@@ -1,7 +1,10 @@
-package github.chenxh.media.flv.script;
+package github.chenxh.media.flv.script.metadata;
 
 import github.chenxh.media.flv.FlvSignature;
 import github.chenxh.media.flv.ITagData;
+import github.chenxh.media.flv.script.CuePoint;
+import github.chenxh.media.flv.script.EcmaArray;
+import github.chenxh.media.flv.script.StrictArray;
 import github.chenxh.media.flv.script.StrictArray.ITypeConverter;
 
 import java.sql.Timestamp;

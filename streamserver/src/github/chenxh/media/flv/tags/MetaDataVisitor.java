@@ -6,10 +6,10 @@ import github.chenxh.media.flv.ITagHead;
 import github.chenxh.media.flv.ITagTrunk;
 import github.chenxh.media.flv.ITagData;
 import github.chenxh.media.flv.script.EcmaArray;
-import github.chenxh.media.flv.script.FlvMetaData;
 import github.chenxh.media.flv.script.MovieClip;
 import github.chenxh.media.flv.script.StrictArray;
 import github.chenxh.media.flv.script.ScriptDataType;
+import github.chenxh.media.flv.script.metadata.FlvMetaData;
 
 import java.io.ByteArrayInputStream;
 import java.io.EOFException;

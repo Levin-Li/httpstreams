@@ -1,4 +1,7 @@
-package github.chenxh.media.flv.script;
+package github.chenxh.media.flv.script.metadata;
+
+import github.chenxh.media.flv.script.EcmaArray;
+import github.chenxh.media.flv.script.StrictArray;
 
 import org.apache.commons.lang.ArrayUtils;
 
