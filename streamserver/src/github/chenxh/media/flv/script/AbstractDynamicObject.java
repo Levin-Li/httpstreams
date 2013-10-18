@@ -29,7 +29,7 @@ public abstract class AbstractDynamicObject {
         
     }
     
-    public AbstractDynamicObject() {
+    protected AbstractDynamicObject() {
         this(8);
     }
 

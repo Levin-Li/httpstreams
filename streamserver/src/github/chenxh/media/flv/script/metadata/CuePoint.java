@@ -40,7 +40,7 @@ public class CuePoint {
     public double getTime() {
         return time;
     }
-    public AbstractDynamicObject getParams() {
+    public EcmaArray getParams() {
         return parameters;
     }
     
