@@ -39,6 +39,7 @@ public class FlvStreamServlet extends HttpServlet {
         logger.debug("download:{}", source.getAbsoluteFile());
 
         if (source.exists()) {
+            resp.setStatus(HttpServletResponse.SC_OK);
             resp.setContentType("video/x-flv");
             write(req, resp, source);
         } else {
@@ -76,14 +77,13 @@ public class FlvStreamServlet extends HttpServlet {
                 } else {
                     // flv head 
                     encoder.encodeSignature(metaData.getSignature(), dataOut);
-                    
-                    // pre tag size
-                    // metadata
                     dataOut.writeUI32(FlvSignature.MIN_HEAD_SIZE);
-                    //int tagSize = encoder.encodeTag(metaData, dataOut);
                     
-                    // pre tags ize
+                    // metadata
+                    //   tag size
+                    //   int tagSize = encoder.encodeTag(metaData, dataOut);
                     //dataOut.writeUI32(tagSize);
+                    
                     directOutput(resp, source, position);
                 }
 
