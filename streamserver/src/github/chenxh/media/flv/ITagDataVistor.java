@@ -17,13 +17,14 @@ public interface ITagDataVistor {
 
     /**
      * 在这个标签之后是否中断继续遍历
-     * 
+     * @param preTagSize pre tag size
      * @param tag
+     * 
      * @return  true 表示中断 
      * @throws IOException
      * @throws EOFException
      */
-    public abstract boolean interruptAfterTag(ITagTrunk tag) throws IOException, EOFException;
+    public abstract boolean interruptAfterTag(long preTagSize, ITagHead tag) throws IOException, EOFException;
 
     public boolean interruptAfterSignature(FlvSignature signature) throws IOException, EOFException;
 }
