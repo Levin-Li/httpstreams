@@ -18,8 +18,9 @@ public class CuePoint {
     
     /**
      * like "navigation"
+     * like "actionscript"
      */
-    private String type;
+    private String type = "navigation";
 
     public CuePoint (EcmaArray octstream) {
 
