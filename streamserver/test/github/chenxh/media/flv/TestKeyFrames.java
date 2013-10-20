@@ -1,6 +1,5 @@
 package github.chenxh.media.flv;
 
-import github.chenxh.media.UnsignedDataInput;
 import github.chenxh.media.flv.script.metadata.KeyFrames;
 
 import java.io.File;
@@ -14,18 +13,13 @@ public class TestKeyFrames  {
 
         File file = new File(ITestFiles.ROOT_DIR, ITestFiles.FILE);
 
-        UnsignedDataInput inStream = null;
         try {
-            inStream = new UnsignedDataInput(file);
-            KeyFrames keyFrames = decoder.decodeKeyFrames(inStream);
+            KeyFrames keyFrames = decoder.decodeKeyFrames(file);
             
             System.out.println(keyFrames);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (null != inStream) {
-                inStream.close();
-            }
         }
     }
 }
