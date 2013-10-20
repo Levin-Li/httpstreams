@@ -4,12 +4,12 @@ import github.chenxh.media.UnsignedDataInput;
 import github.chenxh.media.UnsupportMediaTypeException;
 import github.chenxh.media.flv.script.metadata.FlvMetaData;
 import github.chenxh.media.flv.script.metadata.KeyFrames;
-import github.chenxh.media.flv.struct.TagImpl;
 import github.chenxh.media.flv.tags.KeyFrameVisitor;
 import github.chenxh.media.flv.tags.MetaDataVisitor;
 import github.chenxh.media.flv.tags.TagHeadElement;
 
 import java.io.EOFException;
+import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.IOUtils;
@@ -33,10 +33,12 @@ public class FlvDecoder {
      * @return
      * @throws IOException
      */
-    public FlvMetaData decodeMetaData(UnsignedDataInput inStream) throws IOException {
+    public FlvMetaData decodeMetaData(File file) throws IOException {
         MetaDataVisitor metaDataVisitor = new MetaDataVisitor();
         
+        UnsignedDataInput inStream = null;
         try {
+            inStream = new UnsignedDataInput(file);
             decode(inStream, null, metaDataVisitor);
             
             inStream.close();
@@ -56,10 +58,12 @@ public class FlvDecoder {
      * @return
      * @throws IOException
      */
-    public KeyFrames decodeKeyFrames(UnsignedDataInput inStream) throws IOException  {
+    public KeyFrames decodeKeyFrames(File src) throws IOException  {
         KeyFrameVisitor frameVisitor = new KeyFrameVisitor();
 
+        UnsignedDataInput inStream = null;
         try {
+            inStream = new UnsignedDataInput(src);
             decode(inStream, null, frameVisitor);
             
             inStream.close();
@@ -72,7 +76,24 @@ public class FlvDecoder {
         return frameVisitor.getKeyFrames();
     }
     
-    public FlvSignature decode(UnsignedDataInput inStream,
+    public FlvSignature decode(File src,
+            ISignatureDataVisitor signatureDataVisitor,
+            ITagDataVistor tagDataVisitor) throws IOException,
+            UnsupportMediaTypeException, EOFException {
+        UnsignedDataInput inStream = null;
+        try {
+            inStream = new UnsignedDataInput(src);
+            FlvSignature signature = decode(inStream, signatureDataVisitor,
+                    tagDataVisitor);
+
+            inStream.close();
+            return signature;
+        } finally {
+            IOUtils.closeQuietly(inStream);
+        }
+    }
+    
+    private FlvSignature decode(UnsignedDataInput inStream,
             ISignatureDataVisitor signatureDataVisitor, ITagDataVistor tagDataVisitor) throws IOException, UnsupportMediaTypeException, EOFException {
 
         // 读取  flv 头部内容
@@ -94,7 +115,7 @@ public class FlvDecoder {
         }
 
         long previousTagSize = firstTagSize;
-        TagImpl curTag = null;
+        ITagHead curTag = null;
         do {
             // read tag
             curTag = readTag(inStream, tagDataVisitor, header);
@@ -102,11 +123,9 @@ public class FlvDecoder {
                 break;
             }
 
-            // previous tag size, and update this tag size as preTagSize
-            curTag.setPreTagSize(previousTagSize);
-            
+
             // 
-            if (tagDataVisitor.interruptAfterTag(curTag)) {
+            if (tagDataVisitor.interruptAfterTag(previousTagSize, curTag)) {
                 break;
             }
             previousTagSize = inStream.readUI32();
@@ -148,7 +167,7 @@ public class FlvDecoder {
      * @return null if no another datas
      * @throws IOException 
      */
-    private TagImpl readTag(UnsignedDataInput inStream, ITagDataVistor dataVisitor, FlvSignature flv) throws IOException {
+    private ITagHead readTag(UnsignedDataInput inStream, ITagDataVistor dataVisitor, FlvSignature flv) throws IOException {
         int tagType = inStream.read();
         if (-1 == tagType) { // 已经到文件末尾了
             return  null;
@@ -163,9 +182,9 @@ public class FlvDecoder {
         TagHeadElement head = new TagHeadElement(tagType, dataSize, realTimestamp, streamId);
 
         // read tag data
-        ITagData data = head.accept(flv, dataVisitor, inStream);
+        head.accept(flv, dataVisitor, inStream);
 
-        return new TagImpl(head, data);
+        return head;
     }
 
     private static final class DefaultFileHeadVisitor implements ISignatureDataVisitor {
