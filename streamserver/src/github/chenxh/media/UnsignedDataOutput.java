@@ -9,7 +9,7 @@ public class UnsignedDataOutput extends FilterOutputStream {
      * The number of bytes written to the data output stream so far. 
      * If this counter overflows, it will be wrapped to Integer.MAX_VALUE.
      */
-    protected int written;
+    protected long written;
 
     public UnsignedDataOutput(OutputStream out) {
         super(out);
@@ -132,7 +132,7 @@ public class UnsignedDataOutput extends FilterOutputStream {
      * until it reaches Integer.MAX_VALUE.
      */
     private void incCount(int value) {
-        int temp = written + value;
+        long temp = written + value;
         if (temp < 0) {
             temp = Integer.MAX_VALUE;
         }
@@ -145,7 +145,7 @@ public class UnsignedDataOutput extends FilterOutputStream {
      * 
      * @return
      */
-    public int writen() {
+    public long writen() {
         return written;
     }
 
