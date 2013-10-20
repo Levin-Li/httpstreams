@@ -1,15 +1,13 @@
 package github.chenxh.media.flv.tags;
 
-import java.io.EOFException;
-import java.io.IOException;
-
 import github.chenxh.media.UnsignedDataInput;
 import github.chenxh.media.flv.FlvSignature;
-import github.chenxh.media.flv.ITagTrunk;
-import github.chenxh.media.flv.ITagData;
 import github.chenxh.media.flv.ITagDataVistor;
-import github.chenxh.media.flv.ITagHead;
+import github.chenxh.media.flv.ITagTrunk;
 import github.chenxh.media.flv.struct.TagHeadImpl;
+
+import java.io.EOFException;
+import java.io.IOException;
 
 /**
  * 访问者模式的访问元素

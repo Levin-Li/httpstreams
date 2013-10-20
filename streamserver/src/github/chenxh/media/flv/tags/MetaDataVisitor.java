@@ -63,9 +63,9 @@ public class MetaDataVisitor extends TagDataVistorAdapter {
     }
     
     private FlvMetaData parseMetaData(FlvSignature flv, byte[] script) throws IOException{
-        MetaDataDecoder decoder = new MetaDataDecoder();
-        FlvMetaData flvmetaData = decoder.decode(script);
-        
+        FlvMetaData flvmetaData = new MetaDataDecoder().decode(script);
+        flvmetaData.setSignature(flv);
+
         return flvmetaData;
     }
 
