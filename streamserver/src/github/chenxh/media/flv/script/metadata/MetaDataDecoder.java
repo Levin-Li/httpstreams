@@ -1,6 +1,7 @@
 package github.chenxh.media.flv.script.metadata;
 
 import github.chenxh.media.UnsignedDataInput;
+import github.chenxh.media.flv.FlvSignature;
 import github.chenxh.media.flv.script.EcmaArray;
 import github.chenxh.media.flv.script.AbstractDynamicObject;
 import github.chenxh.media.flv.script.EcmaObject;
@@ -23,8 +24,22 @@ public class MetaDataDecoder {
      // 对脚本数据进行解析
         UnsignedDataInput input = new UnsignedDataInput(new ByteArrayInputStream(scriptData));
         FlvMetaData metaData = parseMetaData(input);
-        metaData.setRawBytes(scriptData);
+        if (null == metaData) {
+            return null;
+        }
         
+        boolean hasVideo = metaData.hasVideo();
+        boolean hasAudio = metaData.hasAudio();
+        
+        int typeFlag = (hasAudio && hasVideo)
+                ? FlvSignature.TYPEFLAG_BOTH
+                : (hasAudio
+                        ? FlvSignature.TYPEFLAG_AUDIO
+                        : FlvSignature.TYPEFLAG_VIDEO);
+        
+        FlvSignature signature = new FlvSignature("FLV", 1, typeFlag, FlvSignature.MIN_HEAD_SIZE);
+        metaData.setSignature(signature);
+
         return metaData;
     }
 

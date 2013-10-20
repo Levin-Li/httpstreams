@@ -19,7 +19,7 @@ public class KeyFrames {
 
         StrictArray times = keyFrams.getStrictArray("times");
         StrictArray positions = keyFrams.getStrictArray("filepositions");
-        
+
         if (null == times) {
             times = new StrictArray();
             positions = new StrictArray();
@@ -66,6 +66,19 @@ public class KeyFrames {
         return getFilepositions(object);
     }
 
+    /**
+     * 移动文件位置
+     * 
+     * @param relativeBytes 需要移动的相对位移
+     */
+    public void moveFilePosition(int relativeBytes){
+        StrictArray filePositions = object.getStrictArray("filepositions");
+        for (int i = 0; i < filePositions.size(); i++) {
+            long newPosition = relativeBytes + ((Number)filePositions.get(i)).longValue();
+            filePositions.set(i, newPosition);
+        }
+    }
+    
     public void appendKeyFrame(long position, double time) {
         appendKeyFrame(object, position, time);
     }
@@ -84,5 +97,11 @@ public class KeyFrames {
         
         return b.toString();
     }
+    
+    public void updateKeyFrames(FlvMetaData metaData) {
+        metaData.set(FlvMetaData.P_HAS_KEYFRAMES, true);
+        metaData.set(FlvMetaData.P_KEYFRAMES, this.object);
+    }
+    
     
 }

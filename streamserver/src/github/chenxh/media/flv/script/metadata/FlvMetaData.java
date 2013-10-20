@@ -37,10 +37,6 @@ public class FlvMetaData implements ITagData {
     private FlvSignature signature;
     private EcmaArray rawValue;
 
-    /**
-     * ¿ÉÄÜÎª¿Õ
-     */
-    private byte[] rawBytes;
     
     private FlvMetaData(FlvSignature signature, EcmaArray object) {
         this.signature = signature;
@@ -272,13 +268,6 @@ public class FlvMetaData implements ITagData {
         return signature;
     }
 
-    public byte[] getRawBytes() {
-        return rawBytes;
-    }
-
-    public void setRawBytes(byte[] rawBytes) {
-        this.rawBytes = rawBytes;
-    }
 
     public EcmaArray getRawObject() {
         return rawValue;

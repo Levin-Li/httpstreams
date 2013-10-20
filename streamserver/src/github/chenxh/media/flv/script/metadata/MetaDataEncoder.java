@@ -19,6 +19,8 @@ import org.slf4j.LoggerFactory;
 
 
 public class MetaDataEncoder {
+    private static final String METADATA_AUTHOR = "modified by chenxiuheng@gmail.com";
+
     private static final org.slf4j.Logger logger = LoggerFactory
             .getLogger(MetaDataDecoder.class);
 
@@ -36,11 +38,8 @@ public class MetaDataEncoder {
         writeObject("onMetaData", target);
 
         // metadata ecmaArray
-        metaData.set(FlvMetaData.P_METADATA_CREATOR, "chenxiuheng@gmail.com");
+        metaData.set(FlvMetaData.P_METADATA_CREATOR, METADATA_AUTHOR);
         writeObject(metaData.getRawObject(), target);
-
-        // End
-        target.write(OBJECT_END);
     }
 
     private void writeEcmaArray(EcmaArray array, UnsignedDataOutput target) throws IOException {
