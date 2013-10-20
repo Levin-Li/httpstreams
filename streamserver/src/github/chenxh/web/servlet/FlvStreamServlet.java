@@ -55,11 +55,9 @@ public class FlvStreamServlet extends HttpServlet {
             directOutput(resp, source);
         } else {
 
-            UnsignedDataInput dataIn = null;
             UnsignedDataOutput dataOut = new UnsignedDataOutput(resp.getOutputStream());
             try {
-                dataIn = new UnsignedDataInput(source);
-                FlvMetaData metaData = decoder.decodeMetaData(dataIn);
+                FlvMetaData metaData = decoder.decodeMetaData(source);
                 if (null == metaData) {
                     // 没有 metadata 数据
                     directOutput(resp, source);
@@ -81,15 +79,14 @@ public class FlvStreamServlet extends HttpServlet {
                     
                     // metadata
                     //   tag size
-                    int tagSize = encoder.encodeMetaData(metaData, dataOut);
-                    dataOut.writeUI32(tagSize);
+                    byte[] tag = encoder.encodeMetaDataTag(metaData);
+                    dataOut.write(tag);
+                    dataOut.writeUI32(tag.length);
                     
                     directOutput(resp, source, position);
                 }
 
-                dataIn.close();
             } finally {
-                IOUtils.closeQuietly(dataIn);
                 IOUtils.closeQuietly(dataOut);
             }
         }
