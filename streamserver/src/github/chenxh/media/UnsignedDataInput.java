@@ -295,6 +295,25 @@ public class UnsignedDataInput extends FilterInputStream {
         }
     }
 
+    public final int readEnough(byte b[]) throws IOException {
+        return readEnough(b, 0, b.length);
+    }
+
+    public final int readEnough(byte b[], int off, int len) throws IOException {
+        if (len < 0)
+            throw new IndexOutOfBoundsException();
+        int n = 0;
+        while (n < len) {
+            int count = in.read(b, off + n, len - n);
+            if (count < 0) {
+                break;
+            }
+            n += count;
+        }
+        
+        return n;
+    }
+    
     /**
      * See the general contract of the <code>skipBytes</code> method of
      * <code>DataInput</code>.
