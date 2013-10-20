@@ -36,16 +36,20 @@ public class TagHeadElement extends TagHeadImpl {
      * @throws IOException 
      * @throws EOFException 
      */
-    public ITagData accept(FlvSignature flv, ITagDataVistor decoder, UnsignedDataInput dataInput) throws EOFException, IOException {
+    public void accept(FlvSignature flv, ITagDataVistor decoder, UnsignedDataInput dataInput) throws EOFException, IOException {
         switch (getTagType()) {
             case ITagTrunk.VIDEO:
-                return decoder.readVideoData(flv, this, dataInput);
+                decoder.readVideoData(flv, this, dataInput);
+                break;
             case ITagTrunk.AUDIO:
-                return decoder.readAudioData(flv, this, dataInput);
+                decoder.readAudioData(flv, this, dataInput);
+                break;
             case ITagTrunk.SCRIPT_DATA:
-                return decoder.readScriptData(flv, this, dataInput);
+                decoder.readScriptData(flv, this, dataInput);
+                break;
             default:
-                return decoder.readOtherData(flv, this, dataInput);
+                decoder.readOtherData(flv, this, dataInput);
+                break;
         }
     }
 }

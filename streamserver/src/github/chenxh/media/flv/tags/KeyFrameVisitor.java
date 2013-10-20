@@ -4,7 +4,6 @@ import github.chenxh.media.UnsignedDataInput;
 import github.chenxh.media.flv.FlvSignature;
 import github.chenxh.media.flv.ITagData;
 import github.chenxh.media.flv.ITagHead;
-import github.chenxh.media.flv.ITagTrunk;
 import github.chenxh.media.flv.script.metadata.KeyFrames;
 
 import java.io.EOFException;
@@ -57,7 +56,7 @@ public class KeyFrameVisitor extends TagDataVistorAdapter {
     
 
     @Override
-    public boolean interruptAfterTag(ITagTrunk tag) throws IOException, EOFException {
+    public boolean interruptAfterTag(long preTagSize, ITagHead tag) throws IOException, EOFException {
         newTagPosition += 4; // 每个 tag 之前，都会有 4 字节用来记录上一个  tag 的大小 
         newTagPosition += tag.size();
         

@@ -6,7 +6,6 @@ import java.io.IOException;
 import github.chenxh.media.IDataTrunk;
 import github.chenxh.media.UnsignedDataInput;
 import github.chenxh.media.flv.FlvSignature;
-import github.chenxh.media.flv.ITagTrunk;
 import github.chenxh.media.flv.ITagData;
 import github.chenxh.media.flv.ITagDataVistor;
 import github.chenxh.media.flv.ITagHead;
@@ -55,7 +54,7 @@ public class TagDataVistorAdapter  implements ITagDataVistor {
     }
     
     @Override
-    public boolean interruptAfterTag(ITagTrunk tag) throws IOException, EOFException {
+    public boolean interruptAfterTag(long preTagSize, ITagHead tag) throws IOException, EOFException {
         return false;
     }
 }

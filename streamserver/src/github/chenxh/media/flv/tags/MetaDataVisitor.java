@@ -4,7 +4,6 @@ import github.chenxh.media.UnsignedDataInput;
 import github.chenxh.media.flv.FlvSignature;
 import github.chenxh.media.flv.ITagData;
 import github.chenxh.media.flv.ITagHead;
-import github.chenxh.media.flv.ITagTrunk;
 import github.chenxh.media.flv.script.metadata.FlvMetaData;
 import github.chenxh.media.flv.script.metadata.MetaDataDecoder;
 
@@ -58,7 +57,6 @@ public class MetaDataVisitor extends TagDataVistorAdapter {
         
         // 对脚本数据进行解析
         metaData = parseMetaData(flv, script);
-        metaData.setRawBytes(script);
         metaData.setSignature(flv);
 
         return metaData;
@@ -68,13 +66,12 @@ public class MetaDataVisitor extends TagDataVistorAdapter {
         MetaDataDecoder decoder = new MetaDataDecoder();
         FlvMetaData flvmetaData = decoder.decode(script);
         
-        flvmetaData.setRawBytes(script);
         return flvmetaData;
     }
 
 
     @Override
-    public boolean interruptAfterTag(ITagTrunk tag) throws IOException, EOFException {
+    public boolean interruptAfterTag(long preTagSize, ITagHead tag) throws IOException, EOFException {
         return interruptAfterFirstTag || null != metaData;
     }
 
