@@ -11,6 +11,9 @@ import github.chenxh.media.IDataTrunk;
  */
 public class FlvSignature implements IDataTrunk {
     public static final int MIN_HEAD_SIZE = 9;
+    public static final int TYPEFLAG_VIDEO = 1;
+    public static final int TYPEFLAG_AUDIO = 4;
+    public static final int TYPEFLAG_BOTH = 5;
     
     private String signature = "FLV";
     private int version = 1;
