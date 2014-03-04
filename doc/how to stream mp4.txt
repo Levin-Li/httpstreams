@@ -1,0 +1,7 @@
+See the VOD tutorial section 3.b: http://www.wowza.com/forums/content.php?35-How-to-play-a-video-on-demand-file
+
+"Set the HTTPStreamers property to: cupertinostreaming, smoothstreaming, sanjosestreaming"
+
+This will enable the 3 types of HTTP streaming.
+
+Note that the only browser I know of that supports HTML5 streaming with H.264/AAC is Safari on iOS using Cupertino. Perhaps Android 4, also.
