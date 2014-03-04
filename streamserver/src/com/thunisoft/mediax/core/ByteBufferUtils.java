@@ -16,14 +16,26 @@
 package com.thunisoft.mediax.core;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.channels.ReadableByteChannel;
 
 import com.googlecode.mp4parser.util.IntHashMap;
 
 public final class ByteBufferUtils {
 
-   
+    public static ByteBuffer read(ReadableByteChannel ch, int size) throws IOException{
+        ByteBuffer b = ByteBuffer.allocate(size);
+        
+        int read = 0;
+        do {
+            read = ch.read(b);
+        } while (-1 != read && b.remaining() > 0);
+
+        b.flip();
+        return b;
+    }
 
     public static long readUInt32BE(ByteBuffer bb) {
         long ch1 = readUInt8(bb);
