@@ -1,0 +1,15 @@
+DTS: 解码时间戳
+PTS: 显示时间戳
+
+MPEG2-TS音视频同步原理 
+http://blog.chinaunix.net/uid-26000296-id-3478558.html
+  在TS 层, TS头信息包含了节目时钟参考PCR(Program Clock Reference),
+               用于恢复出与编码端一致的系统时序时钟STC(System Time Clock)。     
+  在PES层, 在PES头信息里包含有表示时间戳PTS(Presentation Time Stamp)和
+               解码时间戳DTS(Decoding Time Stamp);
+  在ES 层, 与同步有关的主要是视频缓冲验证VBV(Video Buffer Verifier),
+              用以防止解码器的缓冲器出现上溢或者下溢;
+
+标准规定在原始音频和视频流中,
+  PTS的间隔不能超过0.7s，
+  出现在TS包头的PCR间隔不能超过0.1s。
