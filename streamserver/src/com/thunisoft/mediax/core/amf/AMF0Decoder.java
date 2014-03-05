@@ -83,37 +83,27 @@ public class AMF0Decoder implements Decoder {
         return value;
     }
 
-    private DynamicObject readEcmaArray(ByteBuffer data) {
-
+    private AMFArray readEcmaArray(ByteBuffer data) {
         int size = data.getInt();
-        DynamicObject object = new AMFArray(size);
-        try {
-            do {
-                String key = readString(data);
-                Object value = readObject(data);
-
-                // 009 结尾
-                if (key.length() == 0 && AMFType.END == value) {
-                    break;
-                } else {
-                    object.put(key, value);
-                    logger.debug("put {}, {}", key, value);
-                }
-            } while (true);
-        } catch (Exception e) {
-            logger.debug("解析 EcmaArray 发生错误，原因：" + e.getMessage(), e);
-        }
-
-        return object;
+        return (AMFArray) setProperties(data, new AMFArray(size), size);
     }
     
     private AMFObject readEcmaObject(ByteBuffer data) {
-        AMFObject object = new AMFObject();
-
+        return (AMFObject) setProperties(data, new AMFObject(), Integer.MAX_VALUE);
+    }
+    
+    private DynamicObject setProperties(ByteBuffer data, DynamicObject object, int maxElementNum) {
+        String key = null;
+        Object value = null;
         try {
-            do {
-                String key = readString(data);
-                Object value = readObject(data);
+            for (int i = 0; i < maxElementNum; i++) {
+                if (data.remaining() <= 0)  {
+                    break;
+                }
+                
+                key = null;
+                key = readString(data);
+                value = readObject(data);
 
                 // 009 结尾
                 if (key.length() == 0 && AMFType.END == value) {
@@ -122,11 +112,11 @@ public class AMF0Decoder implements Decoder {
                     object.put(key, value);
                     logger.debug("put {}, {}", key, value);
                 }
-            } while (true);
+            }
         } catch (Exception e) {
-            logger.debug("解析 EcmaObject 发生错误，原因：" + e.getMessage(), e);
+            logger.debug("解析属性[" + key+ "] 发生错误，原因：" + e.getMessage(), e);
         }
-
+        
         return object;
     }
 
