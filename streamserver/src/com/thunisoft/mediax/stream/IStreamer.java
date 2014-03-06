@@ -1,21 +1,23 @@
 package com.thunisoft.mediax.stream;
 
+import java.io.Closeable;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.sql.Timestamp;
+import java.nio.channels.WritableByteChannel;
 
 
 
-public interface IStreamer {
+public interface IStreamer extends Closeable {
 
-    public abstract Timestamp lastModified();
+    /**
+     * @return  -1 表示修改时间未知
+     * @since V1.0 2014-3-6
+     * @author chenxh
+     */
+    public abstract long lastModified();
 
     public abstract String contentType();
 
     public abstract long contentLength();
 
-    public abstract void write(OutputStream out) throws IOException;
-
-    public abstract void write(OutputStream out, double startAt) throws IOException;
-
+    public abstract void transfer(WritableByteChannel outChannel) throws IOException;
 }

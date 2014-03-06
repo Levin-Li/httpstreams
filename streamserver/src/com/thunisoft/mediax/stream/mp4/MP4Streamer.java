@@ -2,8 +2,6 @@ package com.thunisoft.mediax.stream.mp4;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -27,31 +25,21 @@ import com.thunisoft.mediax.stream.IStreamer;
  * @author chenxh
  */
 public class MP4Streamer extends AbstractFileStreamer implements IStreamer {
-    public MP4Streamer(File file) throws IOException {
-        super(file);
+
+    public MP4Streamer(File file, double startAt) throws IOException {
+        super(file, startAt);
     }
 
     public String contentType() {
         return "video/mp4";
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.thunisoft.mediax.stream.mp4.IStreamer#write(java.io.OutputStream)
-     */
     @Override
-    public void write(OutputStream out) throws IOException {
-        write(out, 0);
+    public void transfer(WritableByteChannel outChannel) throws IOException {
+        transfer(outChannel, startAt());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.thunisoft.mediax.stream.mp4.IStreamer#write(java.io.OutputStream, double)
-     */
-    @Override
-    public void write(OutputStream out, double startAt) throws IOException {
+    public void transfer(WritableByteChannel outChannel, double startAt) throws IOException {
         Movie movie = MovieCreator.build(file().getAbsolutePath());
 
         List<Track> tracks = movie.getTracks();
@@ -111,12 +99,7 @@ public class MP4Streamer extends AbstractFileStreamer implements IStreamer {
         }
 
         Container newContainer = new DefaultMp4Builder().build(movie);
-        WritableByteChannel reponse = Channels.newChannel(out);
-        try {
-            newContainer.writeContainer(reponse);
-        } finally {
-            reponse.close();
-        }
+        newContainer.writeContainer(outChannel);
     }
 
 

@@ -21,7 +21,6 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 
-import com.googlecode.mp4parser.util.IntHashMap;
 
 public final class ByteBufferUtils {
 

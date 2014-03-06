@@ -4,9 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
 
@@ -24,8 +22,9 @@ import com.thunisoft.mediax.stream.AbstractFileStreamer;
  */
 public class FlvStreamer extends AbstractFileStreamer {
 
-    public FlvStreamer(File file) throws FileNotFoundException {
-        super(file);
+    
+    public FlvStreamer(File file, double startAt) throws FileNotFoundException {
+        super(file, startAt);
     }
 
     public String contentType() {
@@ -33,32 +32,33 @@ public class FlvStreamer extends AbstractFileStreamer {
     }
 
     @Override
-    public void write(OutputStream out) throws IOException {
-        FileInputStream fin = new FileInputStream(file());
+    public void transfer(WritableByteChannel outChannel) throws IOException {
+        if (startAt() > 0) {
+            write(outChannel, startAt());
+        } else {
+            write(outChannel);
+        }
+        
+    }
+
+    private void write(WritableByteChannel outChannel) throws IOException {
+        FileInputStream fin = null;
         try {
-            FileChannel ch = fin.getChannel();
-            ByteBuffer buffer = ByteBuffer.allocate(1024 * 8);
-
-            int bytes = 0;
-            while ((bytes = ch.read(buffer)) >= 0) {
-                buffer.flip();
-                out.write(buffer.array(), buffer.arrayOffset(), bytes);
-
-                buffer.clear();
-            }
+            fin = new FileInputStream(file());
+            
+            fin.getChannel().transferTo(0, file().length(), outChannel);
         } finally {
             IOUtils.closeQuietly(fin);
         }
+        
     }
 
-    @Override
-    public void write(OutputStream out, double startAt) throws IOException {
+    public void write(WritableByteChannel outChannel, double startAt) throws IOException {
         FlvFile flvFile = null;
         try {
             flvFile = new FlvFile(file());
 
             ByteBuffer b = flvFile.getFlvHead();
-            WritableByteChannel outChannel = Channels.newChannel(out);
             
             // flv head
             outChannel.write(b);
@@ -68,9 +68,7 @@ public class FlvStreamer extends AbstractFileStreamer {
             FileChannel fch = flvFile.seek((long)startAt);
             long count = fch.size() - fch.position();
             fch.transferTo(fch.position(), count, outChannel);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }finally {
+        } finally {
             IOUtils.closeQuietly(flvFile);
         }
     }
