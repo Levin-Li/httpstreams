@@ -60,4 +60,8 @@ public class StreamerFactory {
         logger.debug("proxy: {}", streamer);
         return streamer;
     }
+    
+    public File getFile(String url) {
+        return new File(url);
+    }
 }
