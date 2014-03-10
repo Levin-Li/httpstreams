@@ -10,7 +10,6 @@ import org.apache.commons.codec.DecoderException;
 
 import com.thunisoft.mediax.core.amf.AMF0Decoder;
 import com.thunisoft.mediax.core.amf.AMFArray;
-import com.thunisoft.mediax.core.flv.FlvMetaData;
 import com.thunisoft.mediax.core.pseudostreaming.AbstractStreamer;
 import com.thunisoft.mediax.core.utils.ByteBufferUtils;
 import com.thunisoft.mediax.core.vfs.RandomAccessChannel;
