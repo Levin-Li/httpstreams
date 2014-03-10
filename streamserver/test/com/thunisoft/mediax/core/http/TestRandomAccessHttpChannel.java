@@ -31,14 +31,17 @@ public class TestRandomAccessHttpChannel extends TestCase {
 
     public void testReadByteBuffer() throws IOException {
         ByteBuffer b1 = ByteBuffer
-                .allocate(RandomAccessHttpChannelImpl.RANGE_LENGTH + 1);
+                .allocate(RandomAccessHttpChannelImpl.RANGE_LENGTH * 2 - 5);
         ByteBuffer b2 = ByteBuffer
-                .allocate(RandomAccessHttpChannelImpl.RANGE_LENGTH + 1);
+                .allocate(RandomAccessHttpChannelImpl.RANGE_LENGTH * 2 - 5);
 
         // at start
-        for (int i = 0; i < RandomAccessHttpChannelImpl.RANGE_LENGTH * 2; i++) {
+        for (int i = 0; i < 10; i++) {
             fch.position(i);
             rch.position(i);
+
+            b1.clear();
+            b2.clear();
 
             int rst1 = fch.read(b1);
             int rst2 = rch.read(b2);
@@ -48,10 +51,53 @@ public class TestRandomAccessHttpChannel extends TestCase {
         }
 
         // at end side
-        for (long i = fch.size() - RandomAccessHttpChannelImpl.RANGE_LENGTH * 2; i < fch
-                .size(); i++) {
+        for (long i = fch.size() - 5; i < fch.size(); i++) {
             fch.position(i);
             rch.position(i);
+
+            b1.clear();
+            b2.clear();
+
+            int rst1 = fch.read(b1);
+            int rst2 = rch.read(b2);
+            assertEquals(rst1, rst2);
+            assertEquals(fch.position(), rch.position());
+            assertEquals(b1, b2);
+        }
+    }
+    
+    public void testReadByteBuffer_01() throws IOException {
+        ByteBuffer b1 = ByteBuffer
+                .allocate(RandomAccessHttpChannelImpl.RANGE_LENGTH * 2 - 5);
+        ByteBuffer b2 = ByteBuffer
+                .allocate(RandomAccessHttpChannelImpl.RANGE_LENGTH * 2 - 5);
+
+        // at start
+        for (int i = 0; i < 10; i++) {
+            fch.position(i);
+            rch.position(i);
+
+            b1.clear();
+            b2.clear();
+            b1.put((byte)1);
+            b2.put((byte)1);
+
+            int rst1 = fch.read(b1);
+            int rst2 = rch.read(b2);
+            assertEquals(rst1, rst2);
+            assertEquals(fch.position(), rch.position());
+            assertEquals(b1, b2);
+        }
+
+        // at end side
+        for (long i = fch.size() - 5; i < fch.size(); i++) {
+            fch.position(i);
+            rch.position(i);
+
+            b1.clear();
+            b2.clear();
+            b1.put((byte)1);
+            b2.put((byte)1);
 
             int rst1 = fch.read(b1);
             int rst2 = rch.read(b2);
@@ -89,9 +135,8 @@ public class TestRandomAccessHttpChannel extends TestCase {
         }
     }
 
-    
     public void testTransferTo() {
-        
+
     }
 
     @Override
