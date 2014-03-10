@@ -56,6 +56,16 @@
 			<artifactId>commons-httpclient</artifactId>
 			<version>3.1</version>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.directory.studio</groupId>
+			<artifactId>net.sf.ehcache.core</artifactId>
+			<version>2.4.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.directory.studio</groupId>
+			<artifactId>org.slf4j.log4j12</artifactId>
+			<version>1.7.2</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.apache.openejb</groupId>
@@ -81,11 +91,11 @@
 			<artifactId>commons-vfs2</artifactId>
 			<version>2.0</version>
 		</dependency>
-<dependency>
-   <groupId>junit</groupId>
-   <artifactId>junit</artifactId>
-   <version>4.4</version>
-</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.4</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<sourceDirectory>${basedir}/src</sourceDirectory>
