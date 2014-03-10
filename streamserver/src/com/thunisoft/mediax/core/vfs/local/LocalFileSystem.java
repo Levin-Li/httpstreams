@@ -2,13 +2,8 @@ package com.thunisoft.mediax.core.vfs.local;
 
 import java.io.IOException;
 
-import org.apache.commons.io.FilenameUtils;
-
-import com.thunisoft.mediax.core.pseudostreaming.flv.FlvStreamer;
-import com.thunisoft.mediax.core.pseudostreaming.mp4.MP4Streamer;
 import com.thunisoft.mediax.core.vfs.FileObject;
 import com.thunisoft.mediax.core.vfs.FileSystem;
-import com.thunisoft.mediax.core.vfs.IStreamer;
 import com.thunisoft.mediax.core.vfs.RandomAccessChannel;
 
 public class LocalFileSystem implements FileSystem {
