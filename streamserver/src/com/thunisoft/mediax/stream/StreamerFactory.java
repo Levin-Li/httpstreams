@@ -31,9 +31,9 @@ public class StreamerFactory {
         if (uri.startsWith("http")) {
             return newHttpProxyStreamer(uri, start);
         } else if ("mp4".equals(suffix)) {
-            return new MP4Streamer(new File(uri), start);
+            return new MP4Streamer(getFile(uri), start);
         } else if ("flv".equals(suffix)) {
-            return new FlvStreamer(new File(uri), start);
+            return new FlvStreamer(getFile(uri), start);
         } else {
             throw new IllegalArgumentException("unsupport " + uri);
         }
@@ -60,7 +60,7 @@ public class StreamerFactory {
         logger.debug("proxy: {}", streamer);
         return streamer;
     }
-    
+
     public File getFile(String url) {
         return new File(url);
     }

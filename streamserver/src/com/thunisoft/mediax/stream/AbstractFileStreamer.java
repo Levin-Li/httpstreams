@@ -20,7 +20,7 @@ public abstract class AbstractFileStreamer implements IStreamer {
     
     protected AbstractFileStreamer(File file, double startAt) throws FileNotFoundException {
         this.file = file;
-        this.startAt = startAt;
+        this.startAt = Math.max(0, startAt);
 
         if (!file.exists()) {
             throw new FileNotFoundException(file.getAbsolutePath());
