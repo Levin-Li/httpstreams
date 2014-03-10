@@ -19,6 +19,8 @@ public class RandomAccessHttpChannelImpl extends AbstractInterruptibleChannel im
 
     private HttpFileObject file;
 
+    private long position;
+    
     private HttpFileSystem fileSystem;
     private HttpRange range;
 
@@ -29,51 +31,42 @@ public class RandomAccessHttpChannelImpl extends AbstractInterruptibleChannel im
         super();
         this.file = file;
         this.fileSystem = fileSystem;
-        this.buffer = ByteBuffer.allocate(RANGE_LENGTH);
 
-        updateRangeAndBuffer(0);
-    }
-
-
-    private void updateRangeAndBuffer(long rangeIndex) throws IOException {
-        range =
-                HttpRange.newInstance(rangeIndex * buffer.capacity(), buffer.capacity(),
-                        file.length());
-
+        range = HttpRange.newInstance(0, lengthOfRange(), file.length());
         buffer = fileSystem.getRangeData(file, range);
     }
 
     @Override
-    public long length() throws IOException {
+    public long length() {
         return file.length();
     }
 
     @Override
-    public long position() throws IOException {
-        return range.startPosition() + buffer.position();
+    public long position() {
+        return position;
     }
 
     @Override
     public void position(long newPosition) throws IOException {
-        if (newPosition >= length() || newPosition < 0) {
+        if (newPosition > length() || newPosition < 0) {
             throw new IOException("position [" + newPosition + "] is out of channel boundary");
         }
 
         // position is in buffer
-        if (position() <= newPosition && newPosition < range.startPosition() + buffer.limit()) {
-            buffer.position((int) (newPosition - range.startPosition()));
+        if (range.include(newPosition)) {
+            buffer.position((int)(newPosition - range.startPosition()));
         } else {
-            // 新位置不在缓冲区里面，需要重新请求
-            updateRangeAndBuffer(newPosition / lengthOfRange());
-
-            // 再次设置位置
-            position(newPosition);
+            range.updateStart(newPosition);
+            buffer = fileSystem.getRangeData(file, range);
         }
+        position = newPosition;
     }
 
+    
+    
 
     private long lengthOfRange() {
-        return range.length();
+        return RANGE_LENGTH;
     }
 
     @Override
@@ -111,13 +104,11 @@ public class RandomAccessHttpChannelImpl extends AbstractInterruptibleChannel im
         long remaining = count;
         while (remaining > 0) {
             read = transfer(buffer, count, sink);
-            if (buffer.remaining() == 0) {
-                position(position());
-            }
-
+            
+            position(position + read);
             remaining -= read;
-
-            if (position() == length()) {
+            
+            if (read < 1) {
                 break;
             }
         }
@@ -130,12 +121,12 @@ public class RandomAccessHttpChannelImpl extends AbstractInterruptibleChannel im
         long bytesRead = 0;
         try {
             begin();
-            if (from.remaining() > count) {
+            if (from.remaining() <= count) {
+                bytesRead = sink.write(from);
+            } else {
                 ByteBuffer duplicated = from.duplicate();
                 duplicated.limit((int) (from.position() + count));
                 bytesRead = sink.write(duplicated);
-            } else {
-                bytesRead = sink.write(from);
             }
         } finally {
             end(bytesRead > 0);
@@ -147,6 +138,12 @@ public class RandomAccessHttpChannelImpl extends AbstractInterruptibleChannel im
     @Override
     protected void implCloseChannel() throws IOException {
         logger.info("close {}", file);
+    }
+
+    @Override
+    public String toString() {
+        return "RandomAccessHttpChannelImpl {position:" + position() + ", length:" + length()
+                + ", range: " + range + "}";
     }
 
     private static Logger logger = LoggerFactory.getLogger(RandomAccessHttpChannelImpl.class);
