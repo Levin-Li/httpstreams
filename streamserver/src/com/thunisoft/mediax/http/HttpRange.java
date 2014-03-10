@@ -166,6 +166,20 @@ public class HttpRange implements Comparable<HttpRange> {
         return start + length - 1;
     }
 
+    public boolean include(long position){
+        return start <= position && position < start + length;
+    }
+
+    /**
+     * 
+     * @param onePointInRange
+     * @since V1.0 2014-3-10
+     * @author chenxh
+     */
+    public void updateStart(long onePointInRange) {
+        start = onePointInRange - onePointInRange % length();
+    }
+
     public String toContentRangeHeader() {
         return HttpHeaders.Values.BYTES + " " + startPosition() + "-" + endPosition()
                 + "/" + fullLength();
