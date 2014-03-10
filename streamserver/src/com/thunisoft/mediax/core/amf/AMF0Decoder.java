@@ -10,7 +10,7 @@ import org.apache.commons.codec.DecoderException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.thunisoft.mediax.core.ByteBufferUtils;
+import com.thunisoft.mediax.core.utils.ByteBufferUtils;
 
 /**
  * AMF 解码

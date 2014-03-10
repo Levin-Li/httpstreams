@@ -2,23 +2,23 @@ package com.thunisoft.mediax.core.flv;
 
 import java.io.Closeable;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 
 import org.apache.commons.codec.Decoder;
 import org.apache.commons.codec.DecoderException;
 
-import com.thunisoft.mediax.core.ByteBufferUtils;
 import com.thunisoft.mediax.core.amf.AMF0Decoder;
 import com.thunisoft.mediax.core.amf.AMFArray;
+import com.thunisoft.mediax.core.utils.ByteBufferUtils;
+import com.thunisoft.mediax.core.vfs.RandomAccessChannel;
+import com.thunisoft.mediax.core.vfs.local.RandomAccessFileChannelImpl;
 
 public class FlvFile implements Closeable {
     private static final int LENGTH_TAGHEAD = 11;
     private static final int LENGTH_TAGSIZE = 4;
 
-    final private FileChannel fch;
+    final private RandomAccessChannel fch;
 
     public static final int TP_SCRIPT = 18;
     public static final int TP_AUDIO = 8;
@@ -28,14 +28,17 @@ public class FlvFile implements Closeable {
     final private FlvMetaData metadata;
 
     public FlvFile(File file) throws IOException {
-        FileInputStream fin = new FileInputStream(file);
-        fch = fin.getChannel();
+        this(new RandomAccessFileChannelImpl(file));
+    }
+
+    public FlvFile(RandomAccessChannel channel) throws IOException {
+        fch = channel;
 
         flvHead = findFlvHead(fch);
         metadata = findMetaData(fch);
     }
 
-    private ByteBuffer findFlvHead(FileChannel fch) throws IOException {
+    private ByteBuffer findFlvHead(RandomAccessChannel fch) throws IOException {
         long lastPosition = fch.position();
 
         try {
@@ -48,7 +51,7 @@ public class FlvFile implements Closeable {
     }
 
 
-    private FlvMetaData findMetaData(FileChannel fch) throws IOException {
+    private FlvMetaData findMetaData(RandomAccessChannel fch) throws IOException {
         long lastPosition = fch.position();
 
         try {
@@ -98,7 +101,7 @@ public class FlvFile implements Closeable {
     }
 
 
-    private ByteBuffer nextTag(FileChannel ch) throws IOException {
+    private ByteBuffer nextTag(RandomAccessChannel ch) throws IOException {
         final long currentPosition = ch.position();
         boolean isHeadOfFile = (currentPosition == 0L);
 
@@ -113,13 +116,13 @@ public class FlvFile implements Closeable {
         }
     }
 
-    private void skipBytes(FileChannel ch, final long bytes) throws IOException {
+    private void skipBytes(RandomAccessChannel ch, final long bytes) throws IOException {
         long newPosition = ch.position() + bytes;
 
         ch.position(newPosition);
     }
 
-    private ByteBuffer readFileHeader(FileChannel ch) throws IOException {
+    private ByteBuffer readFileHeader(RandomAccessChannel ch) throws IOException {
         long startPosition = ch.position();
 
         ByteBuffer bytes = ByteBuffer.allocate(9);
@@ -146,7 +149,7 @@ public class FlvFile implements Closeable {
         return content;
     }
 
-    private ByteBuffer readTag(FileChannel ch) throws IOException {
+    private ByteBuffer readTag(RandomAccessChannel ch) throws IOException {
         long startPosition = ch.position();
 
         // tag head
@@ -178,7 +181,7 @@ public class FlvFile implements Closeable {
         }
     }
 
-    public FileChannel seek(long startAt) throws IOException {
+    public RandomAccessChannel seek(long startAt) throws IOException {
         long position = metadata.getNearestPosition(startAt);
         if (position <= 0) {
             nextTag(fch); // 跳过文件头， 从第一个 Tag开始播
