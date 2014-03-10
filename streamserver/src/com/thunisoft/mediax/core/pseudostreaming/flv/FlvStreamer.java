@@ -46,40 +46,25 @@ public class FlvStreamer extends AbstractStreamer {
     }
 
     public void write(WritableByteChannel outChannel, double startAt) throws IOException {
-        ByteBuffer b = findFlvHead(channel);
+        channel.position(0);
 
         // flv head
-        outChannel.write(b);
-        outChannel.write(ByteBuffer.wrap(ByteBufferUtils.wrapUInt32(b.position())));
+        ByteBuffer fileHead = nextTag(channel); // head
+        outChannel.write(fileHead);
+        outChannel.write(ByteBuffer.wrap(ByteBufferUtils.wrapUInt32(fileHead.position())));
 
         // flv data
-        long position = findMetaData(channel).getNearestPosition((long)startAt);
+        ByteBuffer scriptData = nextTag(channel); // first data tag
+        long position = decodeMetadata(scriptData).getNearestPosition((long)startAt);
         
         channel.transferTo(position, channel.length() - position, outChannel);
     }
 
 
-    private ByteBuffer findFlvHead(RandomAccessChannel fch) throws IOException {
-        long lastPosition = fch.position();
 
+
+    private FlvMetaData decodeMetadata(ByteBuffer scriptData) throws IOException {
         try {
-            fch.position(0);
-            return nextTag(fch); // head
-
-        } finally {
-            fch.position(lastPosition);
-        }
-    }
-
-
-    private FlvMetaData findMetaData(RandomAccessChannel fch) throws IOException {
-        long lastPosition = fch.position();
-
-        try {
-            fch.position(0);
-
-            nextTag(fch); // head
-            ByteBuffer scriptData = nextTag(fch); // first data tag
 
             if (!isScript(scriptData)) {
                 throw new IOException("Is Not A Supported Flv File");
@@ -94,8 +79,6 @@ public class FlvStreamer extends AbstractStreamer {
 
         } catch (DecoderException e) {
             throw new IOException("Is Not A Supported Flv File");
-        } finally {
-            fch.position(lastPosition);
         }
     }
 
