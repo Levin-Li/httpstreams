@@ -172,12 +172,12 @@ public class HttpRange implements Comparable<HttpRange> {
 
     /**
      * 
-     * @param onePointInRange
+     * @param start
      * @since V1.0 2014-3-10
      * @author chenxh
      */
-    public void updateStart(long onePointInRange) {
-        start = onePointInRange - onePointInRange % length();
+    public void setStart(long start) {
+        this.start = start;
     }
 
     public String toContentRangeHeader() {
