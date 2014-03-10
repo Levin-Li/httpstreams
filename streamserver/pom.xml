@@ -15,9 +15,12 @@
 	</properties>
 	<dependencies>
 
-		<!-- <dependency> <groupId>org.apache.mina</groupId> <artifactId>mina-core</artifactId> 
-			<version>2.0.7</version> </dependency> <dependency> <groupId>org.littleshoot</groupId> 
-			<artifactId>sdp</artifactId> <version>1.0.3</version> </dependency> -->
+		<!--
+			<dependency> <groupId>org.apache.mina</groupId>
+			<artifactId>mina-core</artifactId> <version>2.0.7</version>
+			</dependency> <dependency> <groupId>org.littleshoot</groupId>
+			<artifactId>sdp</artifactId> <version>1.0.3</version> </dependency>
+		-->
 		<dependency>
 			<groupId>commons-lang</groupId>
 			<artifactId>commons-lang</artifactId>
@@ -73,7 +76,16 @@
 			<scope>provided</scope>
 		</dependency>
 
-
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-vfs2</artifactId>
+			<version>2.0</version>
+		</dependency>
+<dependency>
+   <groupId>junit</groupId>
+   <artifactId>junit</artifactId>
+   <version>4.4</version>
+</dependency>
 	</dependencies>
 	<build>
 		<sourceDirectory>${basedir}/src</sourceDirectory>
