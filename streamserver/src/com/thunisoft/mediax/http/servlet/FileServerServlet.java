@@ -17,6 +17,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.thunisoft.mediax.core.ByteBufferUtils;
 import com.thunisoft.mediax.http.HttpRange;
 import com.thunisoft.mediax.stream.IStreamer;
 import com.thunisoft.mediax.stream.StreamerFactory;
@@ -33,22 +34,83 @@ public class FileServerServlet extends HttpServlet {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
+    protected void doHead(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        setHttpResponse(req, resp);
+
+    }
+
+
+    @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
             IOException {
-        try {
-            String range = req.getHeader(HttpHeaders.Names.RANGE);
+        int status = setHttpResponse(req, resp);
 
-            resp.reset();
-            if (StringUtils.isEmpty(range)) {
-                doStream(req, resp); // 普通的流化处理
-            } else {
-                doRange(req, resp); // 断点续传
-            }
-        } catch (Exception e) {
-            logger.warn(e.getMessage());
+
+        if (status == HttpServletResponse.SC_OK) {
+            doStream(req, resp);
+        } else if (status == HttpServletResponse.SC_PARTIAL_CONTENT) {
+            doRange(req, resp);
+        } else {
+            // do nothing
         }
     }
 
+
+    /**
+     * @param req
+     * @param resp
+     * @return response status
+     * @since V1.0 2014-3-10
+     * @author chenxh
+     */
+    private int setHttpResponse(HttpServletRequest req, HttpServletResponse resp) {
+        resp.reset();
+
+        // 支持断点续传
+        resp.addHeader(HttpHeaders.Names.ACCEPT_RANGES, HttpHeaders.Values.BYTES);
+
+        // 判断文件存在
+        String localUrl = localUrl(req);
+        File file = StreamerFactory.getInstance().getFile(localUrl);
+        if (null == file || !file.exists()) {
+            logger.info("{} Not Found", localUrl);
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return HttpServletResponse.SC_NOT_FOUND;
+        }
+
+        // 确定文件是否修改
+        long modifiedSince = req.getDateHeader(HttpHeaders.Names.IF_MODIFIED_SINCE);
+        long lastModified =
+                file.lastModified() > 0 ? file.lastModified() : System.currentTimeMillis();
+        boolean isModified = (lastModified > modifiedSince);
+
+        // status, contentType, contentLength
+        int status;
+        String contentType;
+        long contentLength;
+        String range = req.getHeader(HttpHeaders.Names.RANGE);
+        if (!StringUtils.isEmpty(range)) {
+            HttpRange httpRange = HttpRange.parse(range, file.length());
+            status = HttpServletResponse.SC_PARTIAL_CONTENT;
+            contentType = "multipart/byteranges";
+            contentLength = ByteBufferUtils.long2Int(httpRange.length());
+            resp.addHeader(HttpHeaders.Names.CONTENT_RANGE, httpRange.toContentRangeHeader());
+        } else if (isModified) {
+            status = HttpServletResponse.SC_OK;
+            contentType = getServletContext().getMimeType(file.getName());
+            contentLength = file.length();
+        } else {
+            status = HttpServletResponse.SC_NOT_MODIFIED;
+            contentType = getServletContext().getMimeType(file.getName());
+            contentLength = file.length();
+        }
+
+        resp.setStatus(status);
+        resp.setContentType(contentType);
+        resp.setHeader(HttpHeaders.Names.CONTENT_LENGTH, String.valueOf(contentLength));
+        return status;
+    }
     /**
      * 流化处理
      * 
@@ -73,23 +135,6 @@ public class FileServerServlet extends HttpServlet {
 
             logger.debug("will stream {} start={}", url, start);
             streamer = StreamerFactory.getInstance().newStreamer(url, startAt);
-
-            // last modified
-            long modifiedSince =
-                    req
-                       .getDateHeader(com.thunisoft.mediax.stream.proxy.HttpHeaders.Names.IF_MODIFIED_SINCE);
-            long lastModified =
-                    streamer.lastModified() > 0 ? streamer.lastModified()
-                            : System.currentTimeMillis();
-            if (modifiedSince >= lastModified) {
-                resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-                return;
-            }
-
-            // http head
-            resp.setContentType(streamer.contentType());
-            resp.setStatus(HttpServletResponse.SC_OK);
-            resp.addDateHeader(HttpHeaders.Names.LAST_MODIFIED, lastModified);
 
             // content
             streamer.transfer(Channels.newChannel(resp.getOutputStream()));
@@ -126,42 +171,39 @@ public class FileServerServlet extends HttpServlet {
         return -1;
     }
 
+    /**
+     * 断点续传
+     * 
+     * @param req
+     * @param resp
+     * @throws IOException
+     * @since V1.0 2014-3-10
+     * @author chenxh
+     */
     private void doRange(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
-        String localUrl = localUrl(req);
-        File file = StreamerFactory.getInstance().getFile(localUrl);
-        if (null == file || !file.exists()) {
-            logger.info("{} Not Found", localUrl);
-            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            return;
-        }
-
-        String rangeConfig = req.getHeader(HttpHeaders.Names.RANGE); 
-        HttpRange range = HttpRange.newInstance(rangeConfig, file.length());
-
-        resp.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
-        resp.addDateHeader(HttpHeaders.Names.LAST_MODIFIED, file.lastModified());
-        resp.addHeader(HttpHeaders.Names.CONTENT_TYPE, "multipart/byteranges");
-        resp.addHeader(HttpHeaders.Names.ACCEPT_RANGES, HttpHeaders.Values.BYTES);
-        resp.addHeader(HttpHeaders.Names.CONTENT_LENGTH, String.valueOf(range.length()));
-        resp.addHeader(HttpHeaders.Names.CONTENT_RANGE, range.toContentRangeHeader());
-        
         FileInputStream fin = null;
         try {
+            
+            String localUrl = localUrl(req);
+            File file = StreamerFactory.getInstance().getFile(localUrl);
+            
+            String rangeConfig = req.getHeader(HttpHeaders.Names.RANGE);
+            HttpRange range = HttpRange.parse(rangeConfig, file.length());
+
             fin = new FileInputStream(file);
             WritableByteChannel outChannel = Channels.newChannel(resp.getOutputStream());
-            
-            long time1 = System.currentTimeMillis();
-            FileChannel fch = fin.getChannel();
-            
-            long time2 = System.currentTimeMillis();
-            fch.transferTo(range.startPosition(), range.length(), outChannel);
-            
-            long time3 = System.currentTimeMillis();
 
-            logger.debug("cost {}ms on open {}", time2 - time1, file.getAbsolutePath());
-            if (time3 != time2) {
-                logger.debug("transfer {}KB, speed is {}KB/s", range.length()/1024, (range.length() / 1024 * 1000)/(time3-time2));
+            FileChannel fch = fin.getChannel();
+
+            long t1 = System.currentTimeMillis();
+            fch.transferTo(range.startPosition(), range.length(), outChannel);
+
+            long t2 = System.currentTimeMillis();
+
+            if (t2 != t1) {
+                logger.debug("transfer {}KB, speed is {}KB/s", range.length() / 1024,
+                        (range.length() / 1024 * 1000) / (t2 - t1));
             }
         } finally {
             IOUtils.closeQuietly(fin);

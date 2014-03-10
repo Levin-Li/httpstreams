@@ -18,6 +18,8 @@ public class HttpRange implements Comparable<HttpRange> {
 
     final private long fullLength;
 
+    public static final HttpRange EMPTY = newInstance(0, 0, 0);
+    
     /**
      * 
      * @param start
@@ -59,7 +61,7 @@ public class HttpRange implements Comparable<HttpRange> {
      * @since V1.0
      * @Date 2014-3-8
      */
-    public static HttpRange newInstance(String contentRange) {
+    public static HttpRange parse(String contentRange) {
         String[] units = StringUtils.split(contentRange, " ");
         if (!HttpHeaders.Values.BYTES.equals(units[0])) {
             throw new IllegalArgumentException("byte unit is not 'bytes'");
@@ -70,7 +72,7 @@ public class HttpRange implements Comparable<HttpRange> {
             throw new IllegalArgumentException(contentRange + " is illegal!");
         }
 
-        return newInstance(contents[0], Long.parseLong(contents[1]));
+        return parse(contents[0], Long.parseLong(contents[1]));
     }
     
     
@@ -96,7 +98,7 @@ public class HttpRange implements Comparable<HttpRange> {
      * @since V1.0
      * @Date 2014-3-8
      */
-    public static HttpRange newInstance(String range, long fullLength) {
+    public static HttpRange parse(String range, long fullLength) {
         final long maxEnd = fullLength - 1;
 
         long start;

@@ -29,8 +29,20 @@ public class HttpHeaders extends HashMap<String, String> {
         }
     }
     
-    
+    public long getContentLength() {
+        String contentLength = get(Names.CONTENT_LENGTH);
+        
+        try {
+            return Long.parseLong(contentLength);
+        } catch (Exception e) {
+            return -1;
+        }
+    }
 
+    public boolean acceptRanges() {
+        return HttpHeaders.Values.BYTES.equals(get(HttpHeaders.Names.ACCEPT_RANGES));
+    }
+    
     /**
      * Standard HTTP header names.
      */
