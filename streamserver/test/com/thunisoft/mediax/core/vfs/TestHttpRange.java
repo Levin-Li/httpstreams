@@ -1,4 +1,4 @@
-package com.thunisoft.mediax.core.http;
+package com.thunisoft.mediax.core.vfs;
 
 import java.util.Arrays;
 

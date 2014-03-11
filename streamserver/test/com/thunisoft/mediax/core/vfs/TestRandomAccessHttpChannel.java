@@ -1,4 +1,4 @@
-package com.thunisoft.mediax.core.http;
+package com.thunisoft.mediax.core.vfs;
 
 import java.io.File;
 import java.io.FileInputStream;
