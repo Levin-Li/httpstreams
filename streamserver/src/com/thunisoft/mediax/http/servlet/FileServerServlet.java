@@ -75,7 +75,7 @@ public class FileServerServlet extends HttpServlet {
         String localUrl = localUrl(req);
         FileObject file = VFS.getFile(localUrl);
         if (null == file || !file.exists()) {
-            logger.info("{} Not Found", localUrl);
+            logger.warn("{} Not Found", localUrl);
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return HttpServletResponse.SC_NOT_FOUND;
         }
