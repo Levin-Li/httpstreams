@@ -180,7 +180,7 @@ public class HttpFileSystem implements FileSystem {
 
         @Override
         public String toString() {
-            return "{uri:" + uri + ", position:" + position + "}";
+            return "{uri:" + uri + ", lastModified:" + lastModified + ", position:" + position + "}";
         }
     }
 }
