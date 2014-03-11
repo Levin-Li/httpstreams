@@ -38,7 +38,10 @@ public class HttpFileSystem implements FileSystem {
         try {
             int sc = client.executeMethod(method);
 
-            if (sc != HttpServletResponse.SC_OK
+            FileObject file = null;
+            if (sc == HttpServletResponse.SC_NOT_FOUND) {
+                file = new HttpFileObject(uri, new HttpHeaders(method.getResponseHeaders()), false);
+            } else if (sc != HttpServletResponse.SC_OK
                     && sc != HttpServletResponse.SC_PARTIAL_CONTENT) {
                 throw new FileNotFoundException(uri + "response statue: " + sc);
             }
@@ -48,8 +51,7 @@ public class HttpFileSystem implements FileSystem {
                 throw new IOException("server can't accept ranges");
             }
             
-            FileObject file =
-                    new HttpFileObject(uri, new HttpHeaders(method.getResponseHeaders()), true);
+            file = new HttpFileObject(uri, new HttpHeaders(method.getResponseHeaders()), true);
 
             return file;
         } catch (IOException e) {
