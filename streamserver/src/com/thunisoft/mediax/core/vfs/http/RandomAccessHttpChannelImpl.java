@@ -61,12 +61,14 @@ public class RandomAccessHttpChannelImpl extends AbstractInterruptibleChannel
         position = newPosition;
 
         // position is in buffer
-        if (range.include(newPosition)) {
-            buffer.position((int) (newPosition - range.startPosition()));
-        } else {
+        if (!range.include(newPosition)) {
             range.setStart(newPosition - newPosition % range.length());
             buffer = fileSystem.getRangeData(file, range);
         }
+
+        // update buffer position
+        long bufferPosition = newPosition - range.startPosition();
+        buffer.position((int)Math.min(bufferPosition, buffer.limit()));
     }
 
     private long lengthOfRange() {
