@@ -3,23 +3,31 @@ package com.thunisoft.mediax.core.vfs.http;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.util.ArrayList;
 
 import javax.servlet.http.HttpServletResponse;
 
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.Element;
+
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.LoggerFactory;
 
 import com.thunisoft.mediax.core.HttpHeaders;
 import com.thunisoft.mediax.core.vfs.FileObject;
 import com.thunisoft.mediax.core.vfs.FileSystem;
 import com.thunisoft.mediax.core.vfs.RandomAccessChannel;
+import com.thunisoft.mediax.core.vfs.VFS;
 import com.thunisoft.mediax.http.HttpRange;
 
 public class HttpFileSystem implements FileSystem {
@@ -50,7 +58,7 @@ public class HttpFileSystem implements FileSystem {
             if (!header.acceptRanges()) {
                 throw new IOException("server can't accept ranges");
             }
-            
+
             file = new HttpFileObject(uri, new HttpHeaders(method.getResponseHeaders()), true);
 
             return file;
@@ -63,11 +71,30 @@ public class HttpFileSystem implements FileSystem {
 
     @Override
     public RandomAccessChannel openReadChannel(FileObject file) throws IOException {
-        return new RandomAccessHttpChannelImpl((HttpFileObject)file, this);
+        return new RandomAccessHttpChannelImpl((HttpFileObject) file, this);
     }
 
     public ByteBuffer getRangeData(HttpFileObject file, HttpRange range) throws IOException {
         String uri = file.toUri();
+
+        Cache cache = getCache();
+        Key key = buildKey(file, range);
+        Element valueEl = cache.get(key);
+
+
+        byte[] value = null;
+        if (null != valueEl) {
+            value = (byte[]) valueEl.getValue();
+        } else {
+            value = getRangeDataFromWeb(range, uri);
+            cache.put(new Element(key, value));
+        }
+
+        return ByteBuffer.wrap(value);
+    }
+
+    private byte[] getRangeDataFromWeb(HttpRange range, String uri) throws IOException,
+            HttpException {
         HttpMethod method = new GetMethod(uri);
 
         ByteBuffer buffer = ByteBuffer.allocate((int) range.length());
@@ -91,21 +118,63 @@ public class HttpFileSystem implements FileSystem {
             }
 
             // 读取返回的内容
-            in = method.getResponseBodyAsStream();
-            ReadableByteChannel inChannel = Channels.newChannel(in);
-            while (buffer.remaining() > 0) {
-                int read = inChannel.read(buffer);
-                if (read < 0) {
-                    break;
-                }
-            }
-
-            buffer.flip();
-            buffer.limit((int)header.getContentLength());
-            return buffer;
+            return method.getResponseBody();
         } finally {
             IOUtils.closeQuietly(in);
             method.releaseConnection();
+        }
+    }
+
+    private Cache getCache() {
+        final String cacheKey = "HttpFileSystemCache";
+        Cache cache = VFS.getCacheManager().getCache(cacheKey);
+
+        if (null == cache) {
+            VFS.getCacheManager().addCache(cacheKey);
+            cache = VFS.getCacheManager().getCache(cacheKey);
+        }
+
+        return cache;
+    }
+
+    private Key buildKey(HttpFileObject file, HttpRange range) {
+        return new Key(file.toUri(), file.lastModified(), range.startPosition(), range.length());
+    }
+
+    private static class Key implements Serializable {
+        /**   */
+        private static final long serialVersionUID = 1L;
+        private String uri;
+        private long lastModified;
+        private long position;
+        private long length;
+
+
+
+        public Key(String uri, long lastModified, long position, long length) {
+            super();
+            this.uri = uri;
+            this.position = position;
+            this.length = length;
+            this.lastModified = lastModified;
+        }
+
+        @Override
+        public int hashCode() {
+            return 31 * uri.hashCode() + ((int) (lastModified ^ (lastModified >>> 32)));
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) {
+                return true;
+            } else if (!(obj instanceof Key)) {
+                return false;
+            }
+
+            Key other = (Key) obj;
+            return StringUtils.equals(uri, other.uri) && (lastModified == other.lastModified)
+                    && (position == other.position) && (length == other.length);
         }
     }
 }

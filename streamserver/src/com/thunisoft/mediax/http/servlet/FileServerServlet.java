@@ -10,6 +10,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.sf.ehcache.CacheManager;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -34,10 +36,25 @@ public class FileServerServlet extends HttpServlet {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
+    public void init() throws ServletException {
+        String ehcacheConfig = getServletContext().getRealPath("/WEB-INF/classes/ehcache.xml");
+        
+        CacheManager cacheManager;
+        try {
+            cacheManager = CacheManager.create(new File(ehcacheConfig).toURI().toURL());
+            logger.warn("loaded: {}", ehcacheConfig);
+        } catch (Exception e) {
+            cacheManager = CacheManager.create();
+            logger.warn("error to load: {}, and use default Cache Manager", ehcacheConfig);
+        }
+        
+        VFS.set(cacheManager);
+    }
+    
+    @Override
     protected void doHead(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         setHttpResponse(req, resp);
-
     }
 
 
@@ -47,12 +64,16 @@ public class FileServerServlet extends HttpServlet {
         int status = setHttpResponse(req, resp);
 
 
-        if (status == HttpServletResponse.SC_OK) {
-            doStream(req, resp);
-        } else if (status == HttpServletResponse.SC_PARTIAL_CONTENT) {
-            doRange(req, resp);
-        } else {
-            // do nothing
+        try {
+            if (status == HttpServletResponse.SC_OK) {
+                doStream(req, resp);
+            } else if (status == HttpServletResponse.SC_PARTIAL_CONTENT) {
+                doRange(req, resp);
+            } else {
+                // do nothing
+            }
+        } catch (Exception e) {
+            logger.warn(e.getMessage(), e);
         }
     }
 
@@ -63,9 +84,10 @@ public class FileServerServlet extends HttpServlet {
      * @return response status
      * @since V1.0 2014-3-10
      * @author chenxh
-     * @throws IOException 
+     * @throws IOException
      */
-    private int setHttpResponse(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    private int setHttpResponse(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
         resp.reset();
 
         // 支持断点续传
@@ -112,6 +134,7 @@ public class FileServerServlet extends HttpServlet {
         resp.setHeader(HttpHeaders.Names.CONTENT_LENGTH, String.valueOf(contentLength));
         return status;
     }
+
     /**
      * 流化处理
      * 
@@ -185,10 +208,10 @@ public class FileServerServlet extends HttpServlet {
 
         RandomAccessChannel inChannel = null;
         try {
-            
+
             String localUrl = localUrl(req);
             inChannel = VFS.getRandomAccessChannel(localUrl);
-            
+
             String rangeConfig = req.getHeader(HttpHeaders.Names.RANGE);
             HttpRange range = HttpRange.parse(rangeConfig, inChannel.length());
 

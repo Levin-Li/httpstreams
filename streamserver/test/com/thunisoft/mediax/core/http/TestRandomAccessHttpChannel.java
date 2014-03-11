@@ -37,8 +37,8 @@ public class TestRandomAccessHttpChannel extends TestCase {
 
         // at start
         for (int i = 0; i < 10; i++) {
-            fch.position(i);
-            rch.position(i);
+            fch.position(i * RandomAccessHttpChannelImpl.RANGE_LENGTH + 4);
+            rch.position(i * RandomAccessHttpChannelImpl.RANGE_LENGTH + 4);
 
             b1.clear();
             b2.clear();

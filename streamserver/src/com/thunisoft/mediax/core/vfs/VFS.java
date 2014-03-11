@@ -5,6 +5,8 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.sf.ehcache.CacheManager;
+
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.io.FilenameUtils;
 
@@ -66,5 +68,20 @@ public class VFS {
         }
 
         throw new IOException("No Streamer support: " + file);
+    }
+
+    
+    
+    private static CacheManager cacheManager;
+    public static CacheManager getCacheManager() {
+        if (null != cacheManager) {
+            return cacheManager;
+        } else {
+            return cacheManager = CacheManager.create();
+        }
+    }
+    
+    public static void set(CacheManager manager) {
+        cacheManager = manager;
     }
 }
