@@ -72,7 +72,7 @@ public class HttpRange implements Comparable<HttpRange> {
             throw new IllegalArgumentException(contentRange + " is illegal!");
         }
 
-        return parse(contents[0], Long.parseLong(contents[1]));
+        return parseRange(contents[0], Long.parseLong(contents[1]));
     }
     
     
@@ -83,12 +83,12 @@ public class HttpRange implements Comparable<HttpRange> {
      * 
      * <pre>
      * 示例一：
-     *   请求第一个100 字节， range内容为： 0-99
-     *   请求第二个100 字节， range内容为： 100-199 
+     *   请求第一个100 字节， range内容为：bytes= 0-99
+     *   请求第二个100 字节， range内容为： bytes=100-199 
      * 示例二：
-     *   请求从 100字节及以后的所有字节： 100-   
+     *   请求从 100字节及以后的所有字节： bytes=100-   
      * 示例三：
-     *   请求最后的 100 字节： -100
+     *   请求最后的 100 字节： bytes=-100
      * </pre>
      * 
      * @param range
@@ -98,33 +98,38 @@ public class HttpRange implements Comparable<HttpRange> {
      * @since V1.0
      * @Date 2014-3-8
      */
-    public static HttpRange parse(String range, long fullLength) {
+    public static HttpRange parse(String rangeHeader, long fullLength) {
+        String range = rangeHeader.substring("bytes=".length());
+        return parseRange(range, fullLength);
+    }
+
+    /**
+     * 
+     * @param range  格式如： 0-99
+     * @param fullLength
+     * @return
+     * @since V1.0 2014-3-11
+     * @author chenxh
+     */
+    private static HttpRange parseRange(String range, long fullLength) {
         final long maxEnd = fullLength - 1;
 
         long start;
         long end;
 
-        String[] positions = StringUtils.split(range, '-');
-        if (null == positions || positions.length != 2) {
-            throw new IllegalArgumentException("[" + range + "] 不包含分隔符 '-' !");
-        }
-
-        String firstPosition = positions[0];
-        String secondPosition = positions[1];
-        if (StringUtils.isEmpty(firstPosition)
-                && StringUtils.isEmpty(secondPosition)) {
-            throw new IllegalArgumentException("[" + range + "] 不能只包含 '-' !");
-        }
-
-        if (StringUtils.isEmpty(secondPosition)) { // 100-
-            start = Long.parseLong(firstPosition);
+        int indexOf_ = range.indexOf('-');
+        if (indexOf_ < 0) { // 不包含 -, 格式如: bytes=100
+            start = Long.valueOf(range);
             end = maxEnd;
-        } else if (StringUtils.isEmpty(firstPosition)) { // -100
-            start = maxEnd - Long.parseLong(secondPosition);
+        } else if (indexOf_ == (0)) { // 格式如： bytes=-100
+            start = maxEnd - Long.valueOf(range.substring(1)) + 1;
             end = maxEnd;
-        } else { // 100-199
-            start = Long.parseLong(firstPosition);
-            end = Long.parseLong(secondPosition);
+        } else if (indexOf_ == (range.length() - 1)) { // 格式如： bytes=100-
+            start = Long.valueOf(range.substring(0, indexOf_));
+            end = maxEnd;
+        } else { // 格式如： bytes=0-99
+            start = Long.valueOf(range.substring(0, indexOf_));
+            end = Long.valueOf(range.substring(indexOf_+1));
         }
 
         return newInstance(start, end - start + 1, fullLength);
@@ -186,7 +191,7 @@ public class HttpRange implements Comparable<HttpRange> {
     }
 
     public String toRangeHeader() {
-        return startPosition() + "-" + endPosition();
+        return "bytes="+startPosition() + "-" + endPosition();
     }
 
     /**
