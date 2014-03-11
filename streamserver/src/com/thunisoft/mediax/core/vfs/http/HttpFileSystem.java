@@ -85,6 +85,7 @@ public class HttpFileSystem implements FileSystem {
         byte[] value = null;
         if (null != valueEl) {
             value = (byte[]) valueEl.getValue();
+            logger.debug("cached: {}", key);
         } else {
             value = getRangeDataFromWeb(range, uri);
             cache.put(new Element(key, value));
@@ -175,6 +176,11 @@ public class HttpFileSystem implements FileSystem {
             Key other = (Key) obj;
             return StringUtils.equals(uri, other.uri) && (lastModified == other.lastModified)
                     && (position == other.position) && (length == other.length);
+        }
+
+        @Override
+        public String toString() {
+            return "{uri:" + uri + ", position:" + position + "}";
         }
     }
 }
