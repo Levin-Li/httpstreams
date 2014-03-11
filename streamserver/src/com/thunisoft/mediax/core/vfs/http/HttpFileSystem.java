@@ -52,14 +52,14 @@ public class HttpFileSystem implements FileSystem {
             } else if (sc != HttpServletResponse.SC_OK
                     && sc != HttpServletResponse.SC_PARTIAL_CONTENT) {
                 throw new FileNotFoundException(uri + "response statue: " + sc);
-            }
+            } else {
+                HttpHeaders header = new HttpHeaders(method.getResponseHeaders());
+                if (!header.acceptRanges()) {
+                    throw new IOException("server can't accept ranges");
+                }
 
-            HttpHeaders header = new HttpHeaders(method.getResponseHeaders());
-            if (!header.acceptRanges()) {
-                throw new IOException("server can't accept ranges");
+                file = new HttpFileObject(uri, new HttpHeaders(method.getResponseHeaders()), true);
             }
-
-            file = new HttpFileObject(uri, new HttpHeaders(method.getResponseHeaders()), true);
 
             return file;
         } catch (IOException e) {
