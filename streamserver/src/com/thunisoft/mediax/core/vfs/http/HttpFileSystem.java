@@ -90,7 +90,7 @@ public class HttpFileSystem implements FileSystem {
             cache.put(new Element(key, value));
         }
 
-        return ByteBuffer.wrap(value);
+        return ByteBuffer.wrap(value).asReadOnlyBuffer();
     }
 
     private byte[] getRangeDataFromWeb(HttpRange range, String uri) throws IOException,
