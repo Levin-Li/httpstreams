@@ -25,9 +25,9 @@ public class AMF0Decoder implements Decoder {
     @Override
     public Object decode(Object source) throws DecoderException {
         if (source instanceof ByteBuffer) {
-            return decode((ByteBuffer) source);
+            return readObject((ByteBuffer) source);
         } else if (source instanceof byte[]) {
-            return decode(ByteBuffer.wrap((byte[]) source));
+            return readObject(ByteBuffer.wrap((byte[]) source));
         } else {
             throw new IllegalArgumentException("unsupport Object[" + source + "]");
         }
@@ -37,7 +37,7 @@ public class AMF0Decoder implements Decoder {
         return readObject(buffer);
     }
 
-    private Object readObject(ByteBuffer data) {
+    private Object readObject(ByteBuffer data) throws DecoderException {
         int valueType = data.get();
         final Object value;
         switch (valueType) {
@@ -77,7 +77,7 @@ public class AMF0Decoder implements Decoder {
             case AMFType.DT_REFERENCE:
             case AMFType.DT_UNDEFINED:
             default:
-                throw new UnsupportedAMFTypeException(valueType);
+                throw new UnsupportedAMFTypeException(valueType, data);
         }
 
         return value;
@@ -85,7 +85,13 @@ public class AMF0Decoder implements Decoder {
 
     private AMFArray readEcmaArray(ByteBuffer data) {
         int size = data.getInt();
-        return (AMFArray) setProperties(data, new AMFArray(size), size);
+        AMFArray array = (AMFArray) setProperties(data, new AMFArray(size), Integer.MAX_VALUE);
+        
+        if (array.size() != size) {
+            logger.warn("except AMFArray.size is {}, but actually is {}", size, array.size());
+        }
+        
+        return array;
     }
     
     private AMFObject readEcmaObject(ByteBuffer data) {
@@ -114,7 +120,7 @@ public class AMF0Decoder implements Decoder {
                 }
             }
         } catch (Exception e) {
-            logger.debug("解析属性[" + key+ "] 发生错误，原因：" + e.getMessage(), e);
+            logger.warn("解析属性[" + key+ "] 发生错误，原因：" + e.getMessage(), e);
         }
         
         return object;
