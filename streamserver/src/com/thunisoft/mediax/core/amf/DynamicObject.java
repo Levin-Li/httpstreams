@@ -7,7 +7,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 class DynamicObject extends ArrayList<Entry> {
+    private static final Logger logger = LoggerFactory.getLogger(DynamicObject.class);
 
     /**   */
     private static final long serialVersionUID = 1L;
@@ -37,6 +41,7 @@ class DynamicObject extends ArrayList<Entry> {
         if (b instanceof Boolean) {
             return (Boolean)b;
         } else {
+            logger.warn("value[{}] of key[{}] is not boolean object", b, key);
             return "true".equals(String.valueOf(b));
         }
     }
@@ -101,6 +106,7 @@ class DynamicObject extends ArrayList<Entry> {
         if (value instanceof Number) {
             return (Number) value;
         } else {
+            logger.warn("value[{}] of key[{}] is not boolean Number", value, key);
             try {
                 return Double.parseDouble(String.valueOf(value));
             } catch (Exception e) {
