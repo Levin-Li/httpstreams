@@ -32,39 +32,46 @@ class DynamicObject extends ArrayList<Entry> {
     }
 
     public boolean getBoolean(String key) {
-        return (Boolean) get(key, false);
+        Object b = get(key, false);
+        
+        if (b instanceof Boolean) {
+            return (Boolean)b;
+        } else {
+            return "true".equals(String.valueOf(b));
+        }
     }
 
+    @SuppressWarnings("unchecked")
     public <T> T get(String key) {
-        return get(key, null);
+        return (T) get(key, null);
     }
 
-    public <T> T get(String key, T defaultValue) {
+    public Object get(String key, Object defaultValue) {
         for (Entry entry : this) {
             String name = entry.getName();
             if (null != name && name.equals(key)) {
-                return (T) entry.getValue();
+                return entry.getValue();
             }
         }
-    
+
         return defaultValue;
     }
 
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder();
-    
+
         b.append("AMFArray {");
-    
+
         int entryIndex = 0;
         for (Entry entry : this) {
             if (entryIndex > 0) {
                 b.append(", ");
             }
-    
+
             b.append(entry.getName());
             b.append(":");
-    
+
             Object value = entry.getValue();
             if (null == value) {
                 b.append("null");
@@ -75,11 +82,11 @@ class DynamicObject extends ArrayList<Entry> {
             } else {
                 b.append(value);
             }
-    
+
             entryIndex += 1;
         }
         b.append("}");
-    
+
         return b.toString();
     }
 
@@ -116,7 +123,7 @@ class DynamicObject extends ArrayList<Entry> {
     }
 
     public Object[] getArray(String key) {
-        return get(key, new Object[0]);
+        return (Object[]) get(key, new Object[0]);
     }
 
 }
