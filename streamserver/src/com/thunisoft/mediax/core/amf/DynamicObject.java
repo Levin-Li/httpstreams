@@ -95,7 +95,18 @@ class DynamicObject extends ArrayList<Entry> {
     }
 
     private Number getNumber(String key) {
-        return (Number) get(key, 0L);
+        long defaultValue = 0L;
+
+        Object value = get(key, defaultValue);
+        if (value instanceof Number) {
+            return (Number) value;
+        } else {
+            try {
+                return Double.parseDouble(String.valueOf(value));
+            } catch (Exception e) {
+               return defaultValue;
+            }
+        }
     }
 
     public double getDouble(String key) {
