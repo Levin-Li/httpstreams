@@ -11,8 +11,7 @@ import java.nio.channels.FileChannel.MapMode;
 import com.thunisoft.mediax.core.vfs.RandomAccessChannel;
 
 public class RandomAccessFileChannelImpl implements RandomAccessChannel {
-    private File file;
-
+    private String descript;
     private FileChannel fch;
 
     public RandomAccessFileChannelImpl(LocalFile file) throws IOException {
@@ -20,8 +19,13 @@ public class RandomAccessFileChannelImpl implements RandomAccessChannel {
     }
     
     public RandomAccessFileChannelImpl(File file) throws IOException {
-        this.file = file;
         this.fch = new FileInputStream(file).getChannel();
+        this.descript = file.getAbsolutePath();
+    }
+    
+    public RandomAccessFileChannelImpl(FileChannel fch) throws IOException {
+        this.fch = fch;
+        this.descript = "";
     }
     
     @Override
@@ -42,6 +46,19 @@ public class RandomAccessFileChannelImpl implements RandomAccessChannel {
     @Override
     public int read(ByteBuffer dst) throws IOException {
         return fch.read(dst);
+    }
+
+    @Override
+    public int readFull(ByteBuffer dst) throws IOException {
+        int allRead = 0;
+        int read = 0;
+        do {
+            read = fch.read(dst);
+
+            allRead += Math.max(read, 0);
+        } while (-1 != read && dst.remaining() > 0);
+
+        return allRead;
     }
 
     @Override
@@ -69,6 +86,10 @@ public class RandomAccessFileChannelImpl implements RandomAccessChannel {
 
     @Override
     public String toString() {
-        return "RandomAccessReadChannel (" + file + ")";
+        try {
+            return "RandomAccessReadChannel-{position:" + position() + ", length:" + length() + "}";
+        } catch (IOException e) {
+            return "RandomAccessReadChannel-closed";
+        }
     }
 }

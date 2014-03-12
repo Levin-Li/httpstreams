@@ -25,7 +25,7 @@ import java.nio.channels.ReadableByteChannel;
 
 public final class ByteBufferUtils {
 
-    public static ByteBuffer read(ReadableByteChannel ch, int size) throws IOException{
+    public static ByteBuffer readFull(ReadableByteChannel ch, int size) throws IOException{
         ByteBuffer b = ByteBuffer.allocate(size);
         
         int read = 0;
@@ -35,6 +35,13 @@ public final class ByteBufferUtils {
 
         b.flip();
         return b;
+    }
+    
+    public static void readFull(ReadableByteChannel ch, ByteBuffer dst) throws IOException {
+        int read = 0;
+        do {
+            read = ch.read(dst);
+        } while (-1 != read && dst.remaining() > 0);
     }
 
     public static long readUInt32BE(ByteBuffer bb) {

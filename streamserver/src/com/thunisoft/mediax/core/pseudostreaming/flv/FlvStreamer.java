@@ -163,7 +163,7 @@ public class FlvStreamer extends AbstractStreamer {
         // tag
         ch.position(startPosition);
         ByteBuffer content = ByteBuffer.allocate(dataSize);
-        ch.read(content);
+        ch.readFull(content);
 
         content.flip();
         return content;

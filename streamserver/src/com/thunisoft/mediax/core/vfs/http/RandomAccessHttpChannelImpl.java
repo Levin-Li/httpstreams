@@ -14,9 +14,8 @@ import org.slf4j.LoggerFactory;
 import com.thunisoft.mediax.core.vfs.RandomAccessChannel;
 import com.thunisoft.mediax.http.HttpRange;
 
-public class RandomAccessHttpChannelImpl extends AbstractInterruptibleChannel
-        implements
-            RandomAccessChannel {
+public class RandomAccessHttpChannelImpl extends AbstractInterruptibleChannel implements
+        RandomAccessChannel {
     public static final int RANGE_LENGTH = 1024 * 128;
 
     private HttpFileObject file;
@@ -28,8 +27,8 @@ public class RandomAccessHttpChannelImpl extends AbstractInterruptibleChannel
 
     private ByteBuffer buffer;
 
-    public RandomAccessHttpChannelImpl(HttpFileObject file,
-            HttpFileSystem fileSystem) throws IOException {
+    public RandomAccessHttpChannelImpl(HttpFileObject file, HttpFileSystem fileSystem)
+            throws IOException {
         super();
         this.file = file;
         this.fileSystem = fileSystem;
@@ -68,7 +67,11 @@ public class RandomAccessHttpChannelImpl extends AbstractInterruptibleChannel
 
         // update buffer position
         long bufferPosition = newPosition - range.startPosition();
-        buffer.position((int)Math.min(bufferPosition, buffer.limit()));
+        if (bufferPosition <= buffer.limit()) {
+            buffer.position((int)bufferPosition);
+        } else {
+            throw new IOException("position [" + newPosition + "]不存在!");
+        }
     }
 
     private long lengthOfRange() {
@@ -77,14 +80,22 @@ public class RandomAccessHttpChannelImpl extends AbstractInterruptibleChannel
 
     @Override
     public int read(ByteBuffer dst) throws IOException {
-        ByteArrayOutputStream outStream = new ByteArrayOutputStream(dst
-                .remaining());
+        return readFull(dst);
+    }
+
+    public int readFull(ByteBuffer dst) throws IOException {
+        ByteArrayOutputStream outStream = new ByteArrayOutputStream(dst.remaining());
         WritableByteChannel sink = Channels.newChannel(outStream);
 
-        long readed = transferTo(position(), dst.remaining(), sink);
-        dst.put(outStream.toByteArray(), 0, (int) readed);
+        do {
+            long readed = transferTo(position(), dst.remaining(), sink);
+            if (readed < 0) {
+                break;
+            }
+        } while (dst.remaining() > 0);
 
-        return (int) readed;
+        dst.put(outStream.toByteArray(), 0, (int) outStream.size());
+        return outStream.size() > 0 ? outStream.size() : (isEOF() ? -1 : 0);
     }
 
     @Override
@@ -95,13 +106,11 @@ public class RandomAccessHttpChannelImpl extends AbstractInterruptibleChannel
                 throw new IOException("拒绝访问!");
             }
 
-            ByteArrayOutputStream outStream = new ByteArrayOutputStream(
-                    (int) size);
+            ByteArrayOutputStream outStream = new ByteArrayOutputStream((int) size);
             WritableByteChannel sink = Channels.newChannel(outStream);
             transferTo(startPosition, size, sink);
 
-            ByteBuffer rst = ByteBuffer.wrap(outStream.toByteArray(), 0,
-                    outStream.size());
+            ByteBuffer rst = ByteBuffer.wrap(outStream.toByteArray(), 0, outStream.size());
             return rst;
         } finally {
             position(lastPosition);
@@ -109,9 +118,13 @@ public class RandomAccessHttpChannelImpl extends AbstractInterruptibleChannel
     }
 
     @Override
-    public long transferTo(final long startPosition, long count,
-            WritableByteChannel sink) throws IOException {
+    public long transferTo(final long startPosition, long count, WritableByteChannel sink)
+            throws IOException {
         position(startPosition);
+
+        if (isEOF()) {
+            return -1;
+        }
 
         long read = 0;
         long remaining = count;
@@ -130,8 +143,7 @@ public class RandomAccessHttpChannelImpl extends AbstractInterruptibleChannel
 
     }
 
-    private long copy(ByteBuffer from, long count, WritableByteChannel sink)
-            throws IOException {
+    private long copy(ByteBuffer from, long count, WritableByteChannel sink) throws IOException {
         long bytesRead = 0;
         try {
             begin();
@@ -148,9 +160,13 @@ public class RandomAccessHttpChannelImpl extends AbstractInterruptibleChannel
 
         return bytesRead;
     }
-    
+
     private boolean isNotEOF() {
         return (position < length());
+    }
+
+    private boolean isEOF() {
+        return !isNotEOF();
     }
 
     @Override
@@ -158,12 +174,12 @@ public class RandomAccessHttpChannelImpl extends AbstractInterruptibleChannel
         logger.info("close {}", file);
     }
 
+
     @Override
     public String toString() {
-        return "RandomAccessHttpChannelImpl {position:" + position()
-                + ", length:" + length() + ", range: " + range + "}";
+        return "RandomAccessHttpChannelImpl {position:" + position() + ", length:" + length()
+                + ", range: " + range + "}";
     }
 
-    private static Logger logger = LoggerFactory
-            .getLogger(RandomAccessHttpChannelImpl.class);
+    private static Logger logger = LoggerFactory.getLogger(RandomAccessHttpChannelImpl.class);
 }
