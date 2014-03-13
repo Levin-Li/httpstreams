@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.thunisoft.mediax.core.HttpHeaders;
-import com.thunisoft.mediax.core.utils.ByteBufferUtils;
+import com.thunisoft.mediax.core.utils.ByteUtils;
 import com.thunisoft.mediax.core.vfs.FileObject;
 import com.thunisoft.mediax.core.vfs.IStreamer;
 import com.thunisoft.mediax.core.vfs.RandomAccessChannel;
@@ -117,7 +117,7 @@ public class FileServerServlet extends HttpServlet {
             HttpRange httpRange = HttpRange.parse(range, file.length());
             status = HttpServletResponse.SC_PARTIAL_CONTENT;
             contentType = "multipart/byteranges";
-            contentLength = ByteBufferUtils.long2Int(httpRange.length());
+            contentLength = ByteUtils.long2Int(httpRange.length());
             resp.addHeader(HttpHeaders.Names.CONTENT_RANGE, httpRange.toContentRangeHeader());
         } else if (isModified) {
             status = HttpServletResponse.SC_OK;

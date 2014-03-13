@@ -23,7 +23,7 @@ import java.nio.channels.ReadableByteChannel;
 
 
 
-public final class ByteBufferUtils {
+public final class ByteUtils {
 
     public static ByteBuffer readFull(ReadableByteChannel ch, int size) throws IOException{
         ByteBuffer b = ByteBuffer.allocate(size);

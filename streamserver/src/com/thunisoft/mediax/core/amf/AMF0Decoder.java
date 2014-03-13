@@ -10,7 +10,7 @@ import org.apache.commons.codec.DecoderException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.thunisoft.mediax.core.utils.ByteBufferUtils;
+import com.thunisoft.mediax.core.utils.ByteUtils;
 
 /**
  * AMF 解码
@@ -128,12 +128,12 @@ public class AMF0Decoder implements Decoder {
 
     private double readNumber(ByteBuffer data) {
         if (data.remaining() >= 8) {
-            long number = ByteBufferUtils.readUInt64(data);
+            long number = ByteUtils.readUInt64(data);
             return Double.longBitsToDouble(number);
         } else {
             long v = 0;
             while(data.remaining() > 0) {
-                v = v << 8 + ByteBufferUtils.readUInt8(data);
+                v = v << 8 + ByteUtils.readUInt8(data);
             }
             return v;
         }
@@ -145,7 +145,7 @@ public class AMF0Decoder implements Decoder {
     }
 
     private String readString(ByteBuffer data) {
-        int length = (int) ByteBufferUtils.readUInt16(data);
+        int length = (int) ByteUtils.readUInt16(data);
         if (length <= 0) {
             return "";
         } else {
@@ -166,7 +166,7 @@ public class AMF0Decoder implements Decoder {
 
 
     private Object readArray(ByteBuffer data) {
-        long arraySize = ByteBufferUtils.readUInt32(data);
+        long arraySize = ByteUtils.readUInt32(data);
 
         Object[] array = new Object[(int) arraySize];
         

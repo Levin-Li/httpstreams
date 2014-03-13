@@ -11,7 +11,7 @@ import org.apache.commons.codec.DecoderException;
 import com.thunisoft.mediax.core.amf.AMF0Decoder;
 import com.thunisoft.mediax.core.amf.AMFArray;
 import com.thunisoft.mediax.core.pseudostreaming.AbstractStreamer;
-import com.thunisoft.mediax.core.utils.ByteBufferUtils;
+import com.thunisoft.mediax.core.utils.ByteUtils;
 import com.thunisoft.mediax.core.vfs.RandomAccessChannel;
 
 /**
@@ -50,7 +50,7 @@ public class FlvStreamer extends AbstractStreamer {
         // flv head
         ByteBuffer fileHead = nextTag(channel); // head
         outChannel.write(fileHead);
-        outChannel.write(ByteBuffer.wrap(ByteBufferUtils.wrapUInt32(fileHead.position())));
+        outChannel.write(ByteBuffer.wrap(ByteUtils.wrapUInt32(fileHead.position())));
 
         // flv data
         ByteBuffer scriptData = nextTag(channel); // first data tag
@@ -127,21 +127,21 @@ public class FlvStreamer extends AbstractStreamer {
         ByteBuffer bytes = ByteBuffer.allocate(9);
         ch.read(bytes);
         bytes.flip();
-        String typeFlag = ByteBufferUtils.read3cc(bytes);
+        String typeFlag = ByteUtils.read3cc(bytes);
         if (!"flv".equalsIgnoreCase(typeFlag)) {
             throw new IOException("It's not flv file");
         }
 
-        int version = ByteBufferUtils.readUInt8(bytes);
-        int flags = ByteBufferUtils.readUInt8(bytes);
-        long headSize = ByteBufferUtils.readUInt32(bytes);
+        int version = ByteUtils.readUInt8(bytes);
+        int flags = ByteUtils.readUInt8(bytes);
+        long headSize = ByteUtils.readUInt32(bytes);
         boolean hasAudio = (flags & 0xF0) > 0;
         boolean hasVideo = (flags & 0x0F) > 0;
 
 
         // head
         ch.position(startPosition);
-        ByteBuffer content = ByteBuffer.allocate(ByteBufferUtils.long2Int(headSize));
+        ByteBuffer content = ByteBuffer.allocate(ByteUtils.long2Int(headSize));
         ch.read(content);
 
         content.flip();
@@ -155,10 +155,10 @@ public class FlvStreamer extends AbstractStreamer {
         ByteBuffer tagHead = ByteBuffer.allocate(LENGTH_TAGHEAD);
         ch.read(tagHead);
         tagHead.flip();
-        int type = ByteBufferUtils.readUInt8(tagHead);
-        int dataSize = ByteBufferUtils.readUInt24(tagHead);
-        long timestamp = ByteBufferUtils.readUInt32(tagHead);
-        int streamId = ByteBufferUtils.readUInt24(tagHead);
+        int type = ByteUtils.readUInt8(tagHead);
+        int dataSize = ByteUtils.readUInt24(tagHead);
+        long timestamp = ByteUtils.readUInt32(tagHead);
+        int streamId = ByteUtils.readUInt24(tagHead);
 
         // tag
         ch.position(startPosition);
@@ -173,7 +173,7 @@ public class FlvStreamer extends AbstractStreamer {
         int position = tagData.position();
 
         try {
-            int type = ByteBufferUtils.readUInt8(tagData);
+            int type = ByteUtils.readUInt8(tagData);
             return TP_SCRIPT == type;
         } finally {
             tagData.position(position);
