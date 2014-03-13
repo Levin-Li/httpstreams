@@ -1,14 +1,15 @@
 package com.thunisoft.mediax.core.pseudostreaming.flv;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.FileHandler;
 
 import org.apache.commons.codec.Decoder;
 import org.apache.commons.codec.DecoderException;
+import org.slf4j.LoggerFactory;
 
 import com.thunisoft.mediax.core.amf.AMF0Decoder;
 import com.thunisoft.mediax.core.amf.AMFArray;
@@ -16,27 +17,38 @@ import com.thunisoft.mediax.core.pseudostreaming.flv.tag.AudioTag;
 import com.thunisoft.mediax.core.pseudostreaming.flv.tag.FlvHeader;
 import com.thunisoft.mediax.core.pseudostreaming.flv.tag.MetaDataTag;
 import com.thunisoft.mediax.core.pseudostreaming.flv.tag.Tag;
+import com.thunisoft.mediax.core.pseudostreaming.flv.tag.VideoTag;
 import com.thunisoft.mediax.core.utils.ByteBufferUtils;
 import com.thunisoft.mediax.core.vfs.RandomAccessChannel;
+import com.thunisoft.mediax.core.vfs.local.RandomAccessFileChannelImpl;
 
 public class FlvDecoder implements Decoder {
+    private final static org.slf4j.Logger logger = LoggerFactory.getLogger(FlvDecoder.class);
 
     @Override
-    public Object decode(Object source) throws DecoderException {
-        return null;
+    public TagIterator decode(Object source) throws DecoderException {
+
+        try {
+            if (source instanceof File) {
+                return decode(new RandomAccessFileChannelImpl((File) source));
+            }
+        } catch (Exception e) {
+            logger.warn("解码失败，原因：" + e.getMessage(), e);
+        }
+
+        throw new DecoderException("can't decode: " + source);
     }
 
 
-    public Object decode(RandomAccessChannel rch) throws DecoderException {
-        return null;
+    public TagIterator decode(RandomAccessChannel rch) throws DecoderException, IOException {
+        return new TagIterator(this, rch);
     }
 
     public static class TagIterator implements Iterator<ByteBuffer> {
         private FlvDecoder decoder;
         private RandomAccessChannel channel;
 
-        private long position;
-
+        private ByteBuffer preTagSize = ByteBuffer.allocate(4);
         private FlvHeader flvHead;
 
         private TagIterator(FlvDecoder decoder, RandomAccessChannel channel) throws IOException {
@@ -45,15 +57,18 @@ public class FlvDecoder implements Decoder {
             this.channel = channel;
 
             channel.position(0);
-            flvHead = decoder.decodeFileHeader(decoder.nextTag(channel));
-
-            position = channel.position();
+            flvHead = decoder.decodeFileHeader(decoder.readFileHeader(channel));
         }
 
         @Override
         public boolean hasNext() {
             try {
-                return channel.isOpen() && position < channel.length();
+                if (channel.isOpen()) {
+                    return channel.position() + (LENGTH_TAGSIZE + LENGTH_TAGHEAD) < channel
+                                                                                           .length();
+                } else {
+                    return false;
+                }
             } catch (IOException e) {
                 return false;
             }
@@ -62,32 +77,37 @@ public class FlvDecoder implements Decoder {
         @Override
         public ByteBuffer next() {
             try {
-                channel.position(position);
-                ByteBuffer tag = decoder.nextTag(channel);
-                position = channel.position();
-                return tag;
+                int preSize = preTagSize();
+                logger.debug("preTagSize: {}", preSize);
+
+                // next data
+                logger.debug("tagPosition: {}", channel.position());
+                ByteBuffer tagData = decoder.readTag(channel);
+
+                return tagData;
             } catch (IOException e) {
                 throw new IllegalStateException(e.getMessage(), e);
             }
         }
 
-        public Tag parse(ByteBuffer frameTag) throws IOException {
-            int tagType = decoder.tagType(frameTag);
+        private int preTagSize() throws IOException {
+            preTagSize.clear();
 
-            Tag tag = null;
-            switch (tagType) {
-                case TP_VIDEO:
+            // pre tag size
+            ByteBufferUtils.readFull(channel, preTagSize);
+            preTagSize.flip();
 
-                    break;
-                case TP_AUDIO:
-                    break;
-                case TP_SCRIPT:
-                    return decoder.decodeMetadata(frameTag);
-                default:
-                    break;
-            }
+            return preTagSize.getInt();
+        }
 
-            return tag;
+        public Tag nextTag() throws DecoderException {
+            ByteBuffer buffer = next();
+
+            return parse(buffer);
+        }
+
+        public Tag parse(ByteBuffer frameTag) throws DecoderException {
+            return decoder.decodeTag(frameTag);
         };
 
         @Override
@@ -101,28 +121,29 @@ public class FlvDecoder implements Decoder {
 
     }
 
-    private MetaDataTag decodeMetadata(ByteBuffer scriptData) throws IOException {
-        try {
-            scriptData.position(LENGTH_TAGHEAD);
+    private MetaDataTag decodeMetadata(ByteBuffer scriptData) {
+        scriptData.position(LENGTH_TAGHEAD);
 
-            Object[] items = decodeAMF0(scriptData);
-            if (items.length < 2 || "onMetaData".equals(items[0])) {
-                throw new IOException("不是一个 metadata tag");
-            }
-
-            return new MetaDataTag((AMFArray) items[1]);
-
-        } catch (DecoderException e) {
-            throw new IOException("Is Not A Supported Flv File");
+        Object[] items = decodeAMF0(scriptData);
+        if (items.length < 2 || !"onMetaData".equals(items[0])) {
+            throw new IllegalArgumentException("不是一个 metadata tag");
         }
+
+        return new MetaDataTag((AMFArray) items[1]);
     }
 
-    private Object[] decodeAMF0(ByteBuffer tagData) throws DecoderException {
+
+    private Object[] decodeAMF0(ByteBuffer tagData) {
         Decoder decoder = new AMF0Decoder();
 
         List<Object> items = new LinkedList<Object>();
-        while (tagData.remaining() > 0) {
-            items.add(decoder.decode(tagData));
+
+        try {
+            while (tagData.remaining() > 0) {
+                items.add(decoder.decode(tagData));
+            }
+        } catch (Exception e) {
+            logger.warn(e.getMessage(), e);
         }
 
         return items.toArray();
@@ -143,33 +164,52 @@ public class FlvDecoder implements Decoder {
         return new FlvHeader(version, hasVideo, hasAudio, bytes.slice());
     }
 
+    private Tag decodeTag(ByteBuffer frameTag) throws DecoderException {
+        int tagType = typeOf(frameTag);
+
+
+        switch (tagType) {
+            case Tag.VIDEO:
+                return decodeVideoTag(frameTag);
+            case Tag.AUDIO:
+                return decodeAudioTag(frameTag);
+            case Tag.SCRIPT:
+                return decodeMetadata(frameTag);
+            default:
+                throw new DecoderException("unsupport tag type [" + tagType + "]");
+        }
+    }
+
     private AudioTag decodeAudioTag(ByteBuffer bytes) {
         // tag head
         int type = ByteBufferUtils.readUInt8(bytes);
         int dataSize = ByteBufferUtils.readUInt24(bytes);
         long timestamp = ByteBufferUtils.readUInt32(bytes);
         int streamId = ByteBufferUtils.readUInt24(bytes);
-        
+
         // tag data
-        
-        
-        return new AudioTag();
+
+
+        return new AudioTag(type, dataSize, timestamp, streamId);
     }
 
-    private ByteBuffer nextTag(RandomAccessChannel ch) throws IOException {
-        final long currentPosition = ch.position();
-        boolean isHeadOfFile = (currentPosition == 0L);
 
-        if (!isHeadOfFile) {
-            // pre tag size
-            long newPosition = ch.position() + (long) LENGTH_TAGSIZE;
-            ch.position(newPosition);
+    private Tag decodeVideoTag(ByteBuffer bytes) {
+        // tag head
+        int type = ByteBufferUtils.readUInt8(bytes);
+        int dataSize = ByteBufferUtils.readUInt24(bytes);
+        long timestamp = ByteBufferUtils.readUInt32(bytes);
+        int streamId = ByteBufferUtils.readUInt24(bytes);
+        VideoTag tag = new VideoTag(type, dataSize, timestamp, streamId);
 
-            // next tag
-            return readTag(ch);
-        } else {
-            return readFileHeader(ch);
-        }
+        // tag data
+        int frameKey = ByteBufferUtils.readUInt8(bytes);
+        int frameType = (frameKey & 0xF0) >> 4;
+        int codeId = (frameKey & 0x0F) >> 0;
+        tag.setFrameType(frameType);
+        tag.setCodecId(codeId);
+
+        return tag;
     }
 
 
@@ -194,7 +234,7 @@ public class FlvDecoder implements Decoder {
         // head
         ch.position(startPosition);
         ByteBuffer content = ByteBuffer.allocate(ByteBufferUtils.long2Int(headSize));
-        ch.read(content);
+        ch.readFull(content);
 
         content.flip();
         return content;
@@ -212,17 +252,14 @@ public class FlvDecoder implements Decoder {
         long timestamp = ByteBufferUtils.readUInt32(tagHead);
         int streamId = ByteBufferUtils.readUInt24(tagHead);
 
-        // tag
+        // tag, tagSize = headsize + datasize
         ch.position(startPosition);
-        ByteBuffer content = ByteBuffer.allocate(dataSize);
-        ch.read(content);
-
-        content.flip();
-        return content;
+        int tagSize = LENGTH_TAGHEAD + dataSize;
+        return ByteBufferUtils.readFull(ch, tagSize);
     }
 
 
-    private int tagType(ByteBuffer tag) {
+    private int typeOf(ByteBuffer tag) {
         int position = tag.position();
 
         try {
@@ -236,7 +273,4 @@ public class FlvDecoder implements Decoder {
     private static final int LENGTH_TAGSIZE = 4;
 
 
-    public static final int TP_SCRIPT = 18;
-    public static final int TP_AUDIO = 8;
-    public static final int TP_VIDEO = 9;
 }
