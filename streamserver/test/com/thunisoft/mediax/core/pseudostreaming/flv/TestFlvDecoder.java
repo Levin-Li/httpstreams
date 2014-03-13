@@ -5,15 +5,16 @@ import java.io.File;
 import org.apache.commons.codec.DecoderException;
 
 import com.thunisoft.mediax.core.pseudostreaming.flv.FlvDecoder.TagIterator;
+import com.thunisoft.mediax.core.pseudostreaming.flv.h264.AvcVideoTag;
 import com.thunisoft.mediax.core.pseudostreaming.flv.tag.AudioTag;
 import com.thunisoft.mediax.core.pseudostreaming.flv.tag.Tag;
-import com.thunisoft.mediax.core.pseudostreaming.flv.tag.VideoTag;
 
 public class TestFlvDecoder {
     public static void main(String[] args) throws DecoderException {
         FlvDecoder decoder = new FlvDecoder();
 
-        String pathname = "D:/Thunisoft/MyEclipse/workspaces/统一音视频平台/red5-record/03.flv";
+        // String pathname = "D:/Thunisoft/MyEclipse/workspaces/统一音视频平台/red5-client/03.flv";
+        String pathname = "C:/thunisoft/Apache2.2/htdocs/flv/kuiba-0001.flv";
         listTags(decoder, pathname);
         
        // listAudios(decoder, pathname);
@@ -43,7 +44,7 @@ public class TestFlvDecoder {
         while (iterator.hasNext()) {
             Tag tag = nextTag(iterator);
 
-            if (tag instanceof VideoTag) {
+            if (tag instanceof AvcVideoTag) {
                 System.out.println(tag);
             }
         }
@@ -67,7 +68,7 @@ public class TestFlvDecoder {
             Tag tag = iterator.nextTag();
             return tag;
         } catch (Exception e) {
-            // e.printStackTrace();
+            e.printStackTrace();
             return null;
         }
     }

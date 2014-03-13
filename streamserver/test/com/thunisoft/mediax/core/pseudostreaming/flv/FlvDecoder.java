@@ -13,12 +13,14 @@ import org.slf4j.LoggerFactory;
 
 import com.thunisoft.mediax.core.amf.AMF0Decoder;
 import com.thunisoft.mediax.core.amf.AMFArray;
+import com.thunisoft.mediax.core.pseudostreaming.flv.aac.AacPacketDecoder;
+import com.thunisoft.mediax.core.pseudostreaming.flv.h264.AvcPacketDecoder;
 import com.thunisoft.mediax.core.pseudostreaming.flv.tag.AudioTag;
 import com.thunisoft.mediax.core.pseudostreaming.flv.tag.FlvHeader;
 import com.thunisoft.mediax.core.pseudostreaming.flv.tag.MetaDataTag;
 import com.thunisoft.mediax.core.pseudostreaming.flv.tag.Tag;
 import com.thunisoft.mediax.core.pseudostreaming.flv.tag.VideoTag;
-import com.thunisoft.mediax.core.utils.ByteBufferUtils;
+import com.thunisoft.mediax.core.utils.ByteUtils;
 import com.thunisoft.mediax.core.vfs.RandomAccessChannel;
 import com.thunisoft.mediax.core.vfs.local.RandomAccessFileChannelImpl;
 
@@ -94,7 +96,7 @@ public class FlvDecoder implements Decoder {
             preTagSize.clear();
 
             // pre tag size
-            ByteBufferUtils.readFull(channel, preTagSize);
+            ByteUtils.readFull(channel, preTagSize);
             preTagSize.flip();
 
             return preTagSize.getInt();
@@ -151,13 +153,13 @@ public class FlvDecoder implements Decoder {
 
 
     private FlvHeader decodeFileHeader(ByteBuffer bytes) {
-        String typeFlag = ByteBufferUtils.read3cc(bytes);
+        String typeFlag = ByteUtils.read3cc(bytes);
         if (!"flv".equalsIgnoreCase(typeFlag)) {
             throw new IllegalArgumentException("It's not flv file");
         }
 
-        int version = ByteBufferUtils.readUInt8(bytes);
-        int flags = ByteBufferUtils.readUInt8(bytes);
+        int version = ByteUtils.readUInt8(bytes);
+        int flags = ByteUtils.readUInt8(bytes);
         boolean hasAudio = (flags & 0xF0) > 0;
         boolean hasVideo = (flags & 0x0F) > 0;
 
@@ -180,35 +182,78 @@ public class FlvDecoder implements Decoder {
         }
     }
 
-    private AudioTag decodeAudioTag(ByteBuffer bytes) {
+    private AudioTag decodeAudioTag(ByteBuffer bytes) throws DecoderException {
         // tag head
-        int type = ByteBufferUtils.readUInt8(bytes);
-        int dataSize = ByteBufferUtils.readUInt24(bytes);
-        long timestamp = ByteBufferUtils.readUInt32(bytes);
-        int streamId = ByteBufferUtils.readUInt24(bytes);
+        int type = ByteUtils.readUInt8(bytes);
+        int dataSize = ByteUtils.readUInt24(bytes);
+        long timestamp = ByteUtils.readUInt32(bytes);
+        int streamId = ByteUtils.readUInt24(bytes);
 
         // tag data
+        int soundConfig = ByteUtils.readUInt8(bytes);
+        int soundFormat = (soundConfig >> 4) & 0xF;
+        int soundRate = (soundConfig >> 2) & 0x3;
+        int soundSize = (soundConfig >> 1) & 0x1;
+        int soundType = (soundConfig >> 0) & 0x1;
+        
+        AudioTag tag;
+        if (10 == soundFormat) { // aac
+            tag = AacPacketDecoder.decodeAvcVideoTag(bytes);
+        } else {
+            tag = new AudioTag();
+        }
 
-
-        return new AudioTag(type, dataSize, timestamp, streamId);
+        tag.setSoundFormat(soundFormat);
+        tag.setSoundRate(soundRate);
+        tag.setSoundSize(soundSize);
+        tag.setSoundType(soundType);
+        
+        tag.setTagType(type);
+        tag.setDataSize(dataSize);
+        tag.setTimestamp(timestamp);
+        tag.setStreamId(streamId);
+        return tag;
     }
 
 
-    private Tag decodeVideoTag(ByteBuffer bytes) {
+    private Tag decodeVideoTag(ByteBuffer bytes) throws DecoderException {
         // tag head
-        int type = ByteBufferUtils.readUInt8(bytes);
-        int dataSize = ByteBufferUtils.readUInt24(bytes);
-        long timestamp = ByteBufferUtils.readUInt32(bytes);
-        int streamId = ByteBufferUtils.readUInt24(bytes);
-        VideoTag tag = new VideoTag(type, dataSize, timestamp, streamId);
+        int type = ByteUtils.readUInt8(bytes);
+        int dataSize = ByteUtils.readUInt24(bytes);
+        long timestamp = ByteUtils.readUInt32(bytes);
+        int streamId = ByteUtils.readUInt24(bytes);
 
         // tag data
-        int frameKey = ByteBufferUtils.readUInt8(bytes);
+        int frameKey = ByteUtils.readUInt8(bytes);
         int frameType = (frameKey & 0xF0) >> 4;
         int codeId = (frameKey & 0x0F) >> 0;
+
+
+        VideoTag tag;
+
+        int frameSequence = -1;
+        if (frameType == 5) { // video info/command frame, only UI8
+            frameSequence = ByteUtils.readUInt8(bytes);
+
+            tag = new VideoTag();
+        } else if (codeId == 7) { // AVCVIDEOPACKET
+            tag = AvcPacketDecoder.decodeAvcVideoTag(bytes);
+        } else {
+            tag = new VideoTag();
+        }
+        
+        if (frameSequence == 0) {
+            logger.warn("Start of client-side seeking video frame sequence");
+        } else if (frameSequence == 1) {
+            logger.warn("End of client-side seeking video frame sequence");
+        }
+
+        tag.setTagType(type);
+        tag.setDataSize(dataSize);
+        tag.setTimestamp(timestamp);
+        tag.setStreamId(streamId);
         tag.setFrameType(frameType);
         tag.setCodecId(codeId);
-
         return tag;
     }
 
@@ -219,21 +264,21 @@ public class FlvDecoder implements Decoder {
         ByteBuffer bytes = ByteBuffer.allocate(9);
         ch.read(bytes);
         bytes.flip();
-        String typeFlag = ByteBufferUtils.read3cc(bytes);
+        String typeFlag = ByteUtils.read3cc(bytes);
         if (!"flv".equalsIgnoreCase(typeFlag)) {
             throw new IOException("It's not flv file");
         }
 
-        int version = ByteBufferUtils.readUInt8(bytes);
-        int flags = ByteBufferUtils.readUInt8(bytes);
-        long headSize = ByteBufferUtils.readUInt32(bytes);
+        int version = ByteUtils.readUInt8(bytes);
+        int flags = ByteUtils.readUInt8(bytes);
+        long headSize = ByteUtils.readUInt32(bytes);
         boolean hasAudio = (flags & 0xF0) > 0;
         boolean hasVideo = (flags & 0x0F) > 0;
 
 
         // head
         ch.position(startPosition);
-        ByteBuffer content = ByteBuffer.allocate(ByteBufferUtils.long2Int(headSize));
+        ByteBuffer content = ByteBuffer.allocate(ByteUtils.long2Int(headSize));
         ch.readFull(content);
 
         content.flip();
@@ -247,15 +292,15 @@ public class FlvDecoder implements Decoder {
         ByteBuffer tagHead = ByteBuffer.allocate(LENGTH_TAGHEAD);
         ch.read(tagHead);
         tagHead.flip();
-        int type = ByteBufferUtils.readUInt8(tagHead);
-        int dataSize = ByteBufferUtils.readUInt24(tagHead);
-        long timestamp = ByteBufferUtils.readUInt32(tagHead);
-        int streamId = ByteBufferUtils.readUInt24(tagHead);
+        int type = ByteUtils.readUInt8(tagHead);
+        int dataSize = ByteUtils.readUInt24(tagHead);
+        long timestamp = ByteUtils.readUInt32(tagHead);
+        int streamId = ByteUtils.readUInt24(tagHead);
 
         // tag, tagSize = headsize + datasize
         ch.position(startPosition);
         int tagSize = LENGTH_TAGHEAD + dataSize;
-        return ByteBufferUtils.readFull(ch, tagSize);
+        return ByteUtils.readFull(ch, tagSize);
     }
 
 
@@ -263,7 +308,7 @@ public class FlvDecoder implements Decoder {
         int position = tag.position();
 
         try {
-            return ByteBufferUtils.readUInt8(tag);
+            return ByteUtils.readUInt8(tag);
         } finally {
             tag.position(position);
         }

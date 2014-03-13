@@ -3,18 +3,18 @@ package com.thunisoft.mediax.core.pseudostreaming.flv.tag;
 import org.apache.commons.lang.time.DateFormatUtils;
 
 public abstract class AbstractFrameTag implements Tag {
-    protected int type;
+    protected int tagType;
     protected long dataSize;
     protected long timestamp;
     protected long streamId;
 
     public AbstractFrameTag(int type) {
-        this.type = type;
+        this.tagType = type;
     }
 
     public AbstractFrameTag(int type, long dataSize, long timestamp, long streamId) {
         super();
-        this.type = type;
+        this.tagType = type;
         this.streamId = streamId;
         this.timestamp = timestamp;
         this.dataSize = dataSize;
@@ -28,12 +28,12 @@ public abstract class AbstractFrameTag implements Tag {
         this.streamId = streamId;
     }
 
-    public int getType() {
-        return type;
+    public int getTagType() {
+        return tagType;
     }
 
-    public void setType(int type) {
-        this.type = type;
+    public void setTagType(int type) {
+        this.tagType = type;
     }
 
     public long getTimestamp() {
@@ -56,7 +56,7 @@ public abstract class AbstractFrameTag implements Tag {
     public String toString() {
         StringBuilder b = new StringBuilder();
         
-        b.append("Tag-{type:").append(type);
+        b.append("Tag-{type:").append(tagType);
         b.append(", timestamp:").append(DateFormatUtils.format(timestamp, "HH:mm:ss.SSS"));
         b.append(", streamId:").append(streamId);
         b.append(", datasize:").append(dataSize);
