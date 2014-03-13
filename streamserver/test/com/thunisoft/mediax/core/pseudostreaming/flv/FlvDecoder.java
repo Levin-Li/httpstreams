@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 
 import org.apache.commons.codec.Decoder;
 import org.apache.commons.codec.DecoderException;
@@ -123,7 +121,7 @@ public class FlvDecoder implements Decoder {
 
     }
 
-    private MetaDataTag decodeMetadata(ByteBuffer scriptData) {
+    private MetaDataTag decodeMetadata(ByteBuffer scriptData) throws DecoderException {
         scriptData.position(LENGTH_TAGHEAD);
 
         Object[] items = decodeAMF0(scriptData);
@@ -135,20 +133,10 @@ public class FlvDecoder implements Decoder {
     }
 
 
-    private Object[] decodeAMF0(ByteBuffer tagData) {
-        Decoder decoder = new AMF0Decoder();
+    private Object[] decodeAMF0(ByteBuffer tagData) throws DecoderException {
+        AMF0Decoder decoder = new AMF0Decoder();
 
-        List<Object> items = new LinkedList<Object>();
-
-        try {
-            while (tagData.remaining() > 0) {
-                items.add(decoder.decode(tagData));
-            }
-        } catch (Exception e) {
-            logger.warn(e.getMessage(), e);
-        }
-
-        return items.toArray();
+        return decoder.decode(tagData);
     }
 
 
