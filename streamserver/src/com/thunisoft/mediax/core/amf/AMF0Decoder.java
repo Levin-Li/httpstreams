@@ -3,6 +3,8 @@ package com.thunisoft.mediax.core.amf;
 import java.nio.ByteBuffer;
 import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.TimeZone;
 
 import org.apache.commons.codec.Decoder;
@@ -23,18 +25,28 @@ public class AMF0Decoder implements Decoder {
     final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
-    public Object decode(Object source) throws DecoderException {
+    public Object[] decode(Object source) throws DecoderException {
         if (source instanceof ByteBuffer) {
-            return readObject((ByteBuffer) source);
+            return decode((ByteBuffer) source);
         } else if (source instanceof byte[]) {
-            return readObject(ByteBuffer.wrap((byte[]) source));
+            return decode(ByteBuffer.wrap((byte[]) source));
         } else {
             throw new IllegalArgumentException("unsupport Object[" + source + "]");
         }
     }
 
-    public Object decode(ByteBuffer buffer) throws DecoderException {
-        return readObject(buffer);
+    public Object[] decode(ByteBuffer buffer) throws DecoderException {
+        List<Object> items = new LinkedList<Object>();
+
+        try {
+            while (buffer.remaining() > 0) {
+                items.add(readObject(buffer));
+            }
+        } catch (Exception e) {
+            logger.warn(e.getMessage(), e);
+        }
+
+        return items.toArray();
     }
 
     private Object readObject(ByteBuffer data) throws DecoderException {
@@ -52,9 +64,6 @@ public class AMF0Decoder implements Decoder {
                 break;
             case AMFType.DT_OBJECT:
                 value = readEcmaObject(data);
-                break;
-            case AMFType.DT_MOVIE_CLIP:
-                value = readMovieClip(data);
                 break;
             case AMFType.DT_NULL:
                 value = readNull(data);
@@ -156,10 +165,6 @@ public class AMF0Decoder implements Decoder {
     }
 
 
-    private Object readMovieClip(ByteBuffer data) {
-        throw new UnsupportedOperationException("unsupport MovieClip for AMF0");
-    }
-
     private Object readNull(ByteBuffer data) {
         return null;
     }
@@ -208,6 +213,6 @@ public class AMF0Decoder implements Decoder {
         // 校正时间
         // 例如，把东三区的时间，改成东八区的时间
         calendar.add(Calendar.SECOND, (int) (systemTimeOffset - metaDataTimeOffset));
-        return new java.sql.Timestamp(datetime);
+        return new java.sql.Timestamp(calendar.getTimeInMillis());
     }
 }

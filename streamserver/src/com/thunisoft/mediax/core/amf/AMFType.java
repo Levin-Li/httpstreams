@@ -22,6 +22,9 @@ public final class AMFType {
     public static final int DT_DATETIME = 11;
     public static final int DT_LONGSTRIING = 12;
     
+    public static byte[] EOF = new byte[] {
+            0, 0, 9};
+    
     private AMFType(){}
     
     public static Void END = Void.getInstance();

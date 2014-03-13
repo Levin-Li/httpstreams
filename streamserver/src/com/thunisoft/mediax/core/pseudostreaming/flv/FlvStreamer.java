@@ -82,19 +82,20 @@ public class FlvStreamer extends AbstractStreamer {
     }
 
     private AMFArray asMetadata(ByteBuffer tagData) throws DecoderException {
-        Decoder decoder = new AMF0Decoder();
+        AMF0Decoder decoder = new AMF0Decoder();
 
         // tag head
         tagData.position(LENGTH_TAGHEAD);
 
         // string
-        String name = (String) decoder.decode(tagData);
+        Object[] decodedRst = decoder.decode(tagData);
+        String name = (String) decodedRst[0];
         if (!"onMetaData".equals(name)) {
             return null;
         }
 
         // type
-        AMFArray metadata = (AMFArray) decoder.decode(tagData);
+        AMFArray metadata = (AMFArray) decodedRst[1];
         return metadata;
     }
     

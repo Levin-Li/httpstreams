@@ -217,5 +217,9 @@ public class FlvMetaData {
         return b.toString();
     }
 
+    public AMFArray getMetadata() {
+        return metadata;
+    }
+
 
 }
