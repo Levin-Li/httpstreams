@@ -1,5 +1,6 @@
 package com.thunisoft.mediax.core.amf;
 
+import java.io.EOFException;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -25,48 +26,51 @@ public class AMF0Encoder implements Encoder {
             // array
             for (int i = 0; i < length; i++) {
                 Object elment = Array.get(source, i);
-                append(elment, rst);
+                encodeObject(elment, rst);
             }
         } else {
-            append(source, rst);
+            encodeObject(source, rst);
         }
 
         return rst.asByteBuffer();
     }
 
     @SuppressWarnings("unchecked")
-    private void append(Object source, Result rst) throws EncoderException {
+    private void encodeObject(Object source, Result rst) throws EncoderException {
+        // null
         if (null == source) {
             rst.appendUInt8(AMFType.DT_NULL);
             encodeNull(rst);
-        } else if (source instanceof AMFArray) {
-            rst.appendUInt8(AMFType.DT_ECMA_ARRAY);
-            encodeEcmaArray((AMFArray) source, rst);
-        } else if (source instanceof AMFObject) {
-            rst.appendUInt8(AMFType.DT_OBJECT);
-            encodeEcmaObject((AMFObject) source, rst);
-        } else if (source instanceof Map) {
-            rst.appendUInt8(AMFType.DT_OBJECT);
-            encodeEcmaObject((Map<String, Object>) source, rst);
-        } else if (source.getClass().isArray()) {
-            rst.appendUInt8(AMFType.DT_ARRAY);
-            encodeArray(source, rst);
-        } else if (source instanceof List) {
-            rst.appendUInt8(AMFType.DT_ARRAY);
-            encodeArray((List<Object>) source, rst);
-        } else if (source instanceof Boolean || source.getClass().equals(boolean.class)) {
-            rst.appendUInt8(AMFType.DT_BOOLEAN);
-            encodeBoolean((Boolean) source, rst);
-        } else if (source instanceof String) {
+            return;
+        } 
+        
+        // string
+        if (source instanceof String) {
             rst.appendUInt8(AMFType.DT_STRING);
             encodeString((String) source, rst);
-        } else if (source instanceof Date) {
+            return;
+        }
+        
+        // boolean
+        if (source instanceof Boolean || source.getClass().equals(boolean.class)) {
+            rst.appendUInt8(AMFType.DT_BOOLEAN);
+            encodeBoolean((Boolean) source, rst);
+            return;
+        } 
+        
+        // timestamp
+        if (source instanceof Date) {
             rst.appendUInt8(AMFType.DT_DATETIME);
             encodeTimestamp((Date) source, rst);
+            return;
         } else if (source instanceof Calendar) {
             rst.appendUInt8(AMFType.DT_DATETIME);
             encodeTimestamp((Calendar) source, rst);
-        } else if (source instanceof Number
+            return;
+        } 
+        
+        // number
+        if (source instanceof Number
                 || source.getClass().equals(byte.class)
                 || source.getClass().equals(short.class)
                 || source.getClass().equals(int.class)
@@ -76,14 +80,46 @@ public class AMF0Encoder implements Encoder {
             // 使用自动装箱，然后转成Number
             rst.appendUInt8(AMFType.DT_NUMBER);
             encodeNumber((Number)(Object)source, rst);
-        } else {
-            throw new EncoderException("不支持的类型[" + source.getClass() + "]");
+            
+            return;
+        } 
+        
+        // AMFArray
+        if (source instanceof AMFArray) {
+            rst.appendUInt8(AMFType.DT_ECMA_ARRAY);
+            encodeEcmaArray((AMFArray) source, rst);
+            return;
+        } 
+        
+        // AMFObject or Map
+        if (source instanceof AMFObject) {
+            rst.appendUInt8(AMFType.DT_OBJECT);
+            encodeEcmaObject((AMFObject) source, rst);
+            return;
+        } else if (source instanceof Map) {
+            rst.appendUInt8(AMFType.DT_OBJECT);
+            encodeEcmaObject((Map<String, Object>) source, rst);
+            return;
+        } 
+        
+        // strict array
+        if (source.getClass().isArray()) {
+            rst.appendUInt8(AMFType.DT_ARRAY);
+            encodeStrictArray(source, rst);
+            return;
+        } else if (source instanceof List) {
+            rst.appendUInt8(AMFType.DT_ARRAY);
+            encodeStrictArray((List<Object>) source, rst);
+            return;
         }
+        
+        
+        throw new EncoderException("不支持的类型[" + source.getClass() + "]");
     }
 
 
 
-    private void encodeArray(Object array, Result rst) throws EncoderException {
+    private void encodeStrictArray(Object array, Result rst) throws EncoderException {
         // array length
         int length = Array.getLength(array);
         rst.appendUInt32(length);
@@ -91,24 +127,19 @@ public class AMF0Encoder implements Encoder {
         // array
         for (int i = 0; i < length; i++) {
             Object elment = Array.get(array, i);
-            append(elment, rst);
+            encodeObject(elment, rst);
         }
-
-        // end
-        rst.append(AMFType.EOF);
     }
 
-    private void encodeArray(List<Object> array, Result rst) throws EncoderException {
+    private void encodeStrictArray(List<Object> array, Result rst) throws EncoderException {
         // array length
-        rst.appendUInt32(array.size());
+        int length = array.size();
+        rst.appendUInt32(length);
 
         // array
         for (Object object : array) {
-            append(object, rst);
+            encodeObject(object, rst);
         }
-
-        // end
-        rst.append(AMFType.EOF);
     }
 
 
@@ -122,8 +153,8 @@ public class AMF0Encoder implements Encoder {
             String name = entry.getName();
             Object value = entry.getValue();
 
-            rst.append(name.getBytes(Charset.forName("UTF-8")));
-            append(value, rst);
+            encodeString(name, rst);
+            encodeObject(value, rst);
         }
 
         // end
@@ -132,13 +163,13 @@ public class AMF0Encoder implements Encoder {
 
 
     private void encodeEcmaObject(AMFObject source, Result rst) throws EncoderException {
-        // array
+        // <key, value>
         for (Entry entry : source) {
             String name = entry.getName();
             Object value = entry.getValue();
 
-            rst.append(name.getBytes(Charset.forName("UTF-8")));
-            append(value, rst);
+            encodeString(name, rst);
+            encodeObject(value, rst);
         }
 
         // end
@@ -152,8 +183,8 @@ public class AMF0Encoder implements Encoder {
             String name = entry.getKey();
             Object value = entry.getValue();
 
-            rst.append(name.getBytes(Charset.forName("UTF-8")));
-            append(value, rst);
+            encodeString(name, rst);
+            encodeObject(value, rst);
         }
 
         // end
@@ -205,28 +236,24 @@ public class AMF0Encoder implements Encoder {
 
 
         public void appendUInt8(int value) {
-            byte[] content = new byte[1];
-            content[0] = (byte) ((value >> 0) & 0xFF);
+            ByteBuffer buffer = ByteBuffer.allocate(1);
+            buffer.put((byte)value);
 
-            append(content);
+            append(buffer.array());
         }
 
         public void appendUInt16(int value) {
-            byte[] content = new byte[2];
-            content[0] = (byte) ((value >> 8) & 0xFF);
-            content[1] = (byte) ((value >> 0) & 0xFF);
+            ByteBuffer buffer = ByteBuffer.allocate(2);
+            buffer.putShort((short)value);
 
-            append(content);
+            append(buffer.array());
         }
 
         public void appendUInt32(int value) {
-            byte[] content = new byte[4];
-            content[0] = (byte) ((value >> 24) & 0xFF);
-            content[1] = (byte) ((value >> 16) & 0xFF);
-            content[2] = (byte) ((value >> 8) & 0xFF);
-            content[3] = (byte) ((value >> 0) & 0xFF);
+            ByteBuffer buffer = ByteBuffer.allocate(4);
+            buffer.putInt(value);
 
-            append(content);
+            append(buffer.array());
         }
 
 
@@ -234,7 +261,8 @@ public class AMF0Encoder implements Encoder {
         public void appendDouble(double value) {
             ByteBuffer buffer = ByteBuffer.allocate(8);
 
-            buffer.putDouble(value);
+            long lValue = Double.doubleToLongBits(value);
+            buffer.putLong(lValue);
 
             append(buffer.array());
         }

@@ -10,4 +10,5 @@ public class AMFArray extends DynamicObject {
         super(length);
     }
 
+
 }

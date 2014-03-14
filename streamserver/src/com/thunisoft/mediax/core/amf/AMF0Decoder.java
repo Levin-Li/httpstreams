@@ -36,6 +36,8 @@ public class AMF0Decoder implements Decoder {
     }
 
     public Object[] decode(ByteBuffer buffer) throws DecoderException {
+        int start = buffer.position();
+
         List<Object> items = new LinkedList<Object>();
 
         try {
@@ -44,6 +46,8 @@ public class AMF0Decoder implements Decoder {
             }
         } catch (Exception e) {
             logger.warn(e.getMessage(), e);
+        } finally {
+            buffer.position(start);
         }
 
         return items.toArray();
@@ -72,7 +76,7 @@ public class AMF0Decoder implements Decoder {
                 value = readEcmaArray(data);
                 break;
             case AMFType.DT_ARRAY:
-                value = readArray(data);
+                value = readStrictArray(data);
                 break;
             case AMFType.DT_DATETIME:
                 value = readTimestamp(data);
@@ -94,6 +98,7 @@ public class AMF0Decoder implements Decoder {
 
     private AMFArray readEcmaArray(ByteBuffer data) {
         int size = data.getInt();
+        
         AMFArray array = (AMFArray) setProperties(data, new AMFArray(size), Integer.MAX_VALUE);
         
         if (array.size() != size) {
@@ -170,7 +175,7 @@ public class AMF0Decoder implements Decoder {
     }
 
 
-    private Object readArray(ByteBuffer data) {
+    private Object[] readStrictArray(ByteBuffer data) {
         long arraySize = ByteUtils.readUInt32(data);
 
         Object[] array = new Object[(int) arraySize];

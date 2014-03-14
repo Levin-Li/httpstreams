@@ -2,37 +2,48 @@ package com.thunisoft.mediax.core.amf;
 
 
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class DynamicObject extends ArrayList<Entry> {
-    private static final Logger logger = LoggerFactory.getLogger(DynamicObject.class);
-
+class DynamicObject implements Iterable<Entry>, Serializable {
     /**   */
     private static final long serialVersionUID = 1L;
 
+    private static final Logger logger = LoggerFactory.getLogger(DynamicObject.class);
+
+    final private ArrayList<Entry> entries; 
+    
     public DynamicObject() {
-        super();
+        entries = new ArrayList<Entry>(); 
     }
 
     public DynamicObject(int initialCapacity) {
-        super(initialCapacity);
+        entries = new ArrayList<Entry>(initialCapacity); 
     }
 
 
     public DynamicObject(Map<String, Object> v) {
+        this(v.size());
+
         for (java.util.Map.Entry<String, Object> e : v.entrySet()) {
             put(e.getKey(), e.getValue());
         }
     }
 
-    public void put(String name, Object value) {
-        add(new Entry(name, value));
+
+    
+    public Object put(String name, Object value) {
+        Object oldValue = get(name);
+        entries.add(new Entry(name, value));
+        
+        return oldValue;
     }
 
     public boolean getBoolean(String key) {
@@ -52,7 +63,7 @@ class DynamicObject extends ArrayList<Entry> {
     }
 
     public Object get(String key, Object defaultValue) {
-        for (Entry entry : this) {
+        for (Entry entry : entries) {
             String name = entry.getName();
             if (null != name && name.equals(key)) {
                 return entry.getValue();
@@ -69,7 +80,7 @@ class DynamicObject extends ArrayList<Entry> {
         b.append("AMFArray {");
 
         int entryIndex = 0;
-        for (Entry entry : this) {
+        for (Entry entry : entries) {
             if (entryIndex > 0) {
                 b.append(", ");
             }
@@ -141,6 +152,15 @@ class DynamicObject extends ArrayList<Entry> {
 
     public Object[] getArray(String key) {
         return (Object[]) get(key, new Object[0]);
+    }
+
+    @Override
+    public Iterator<Entry> iterator() {
+        return entries.iterator();
+    }
+
+    public int size() {
+        return entries.size();
     }
 
 }
