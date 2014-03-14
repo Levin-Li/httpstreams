@@ -1,6 +1,5 @@
 package com.thunisoft.mediax.core.amf;
 
-import java.io.EOFException;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -272,9 +271,6 @@ public class AMF0Encoder implements Encoder {
             countBytes += bytes.length;
         }
 
-        public void appendObjectType(int type) {
-            appendUInt8(type);
-        }
 
         public ByteBuffer asByteBuffer() {
             ByteBuffer rst = ByteBuffer.allocate(countBytes);
