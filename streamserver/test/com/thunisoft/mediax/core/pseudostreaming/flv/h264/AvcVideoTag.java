@@ -3,8 +3,8 @@ package com.thunisoft.mediax.core.pseudostreaming.flv.h264;
 
 import org.apache.commons.lang.time.DateFormatUtils;
 
-import com.thunisoft.mediax.core.pseudostreaming.flv.tag.Tag;
-import com.thunisoft.mediax.core.pseudostreaming.flv.tag.VideoTag;
+import com.thunisoft.mediax.core.codec.flv.tag.Tag;
+import com.thunisoft.mediax.core.codec.flv.tag.VideoTag;
 
 
 public class AvcVideoTag extends VideoTag implements Tag {

@@ -2,7 +2,7 @@ package com.thunisoft.mediax.core.pseudostreaming.flv.aac;
 
 import org.apache.commons.lang.time.DateFormatUtils;
 
-import com.thunisoft.mediax.core.pseudostreaming.flv.tag.AudioTag;
+import com.thunisoft.mediax.core.codec.flv.tag.AudioTag;
 
 public class AacAudioTag extends AudioTag {
     private int packetType;

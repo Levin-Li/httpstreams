@@ -4,10 +4,10 @@ import java.io.File;
 
 import org.apache.commons.codec.DecoderException;
 
+import com.thunisoft.mediax.core.codec.flv.tag.AudioTag;
+import com.thunisoft.mediax.core.codec.flv.tag.Tag;
 import com.thunisoft.mediax.core.pseudostreaming.flv.FlvDecoder.TagIterator;
 import com.thunisoft.mediax.core.pseudostreaming.flv.h264.AvcVideoTag;
-import com.thunisoft.mediax.core.pseudostreaming.flv.tag.AudioTag;
-import com.thunisoft.mediax.core.pseudostreaming.flv.tag.Tag;
 
 public class TestFlvDecoder {
     public static void main(String[] args) throws DecoderException {

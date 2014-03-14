@@ -16,10 +16,14 @@ import junit.framework.TestCase;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.EncoderException;
 
+import com.thunisoft.mediax.core.codec.amf.AMF0Decoder;
+import com.thunisoft.mediax.core.codec.amf.AMF0Encoder;
+import com.thunisoft.mediax.core.codec.amf.AMFObject;
+import com.thunisoft.mediax.core.codec.amf.Entry;
+import com.thunisoft.mediax.core.codec.flv.FlvMetaData;
+import com.thunisoft.mediax.core.codec.flv.tag.Tag;
 import com.thunisoft.mediax.core.pseudostreaming.flv.FlvDecoder;
 import com.thunisoft.mediax.core.pseudostreaming.flv.FlvDecoder.TagIterator;
-import com.thunisoft.mediax.core.pseudostreaming.flv.FlvMetaData;
-import com.thunisoft.mediax.core.pseudostreaming.flv.tag.Tag;
 
 public class TestAmf extends TestCase {
     

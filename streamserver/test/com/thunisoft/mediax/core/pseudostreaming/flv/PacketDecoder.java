@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 import org.apache.commons.codec.DecoderException;
 
-import com.thunisoft.mediax.core.pseudostreaming.flv.tag.Tag;
+import com.thunisoft.mediax.core.codec.flv.tag.Tag;
 
 public interface PacketDecoder {
 
