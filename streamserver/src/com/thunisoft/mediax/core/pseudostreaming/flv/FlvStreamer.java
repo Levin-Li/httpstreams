@@ -5,11 +5,11 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 
-import org.apache.commons.codec.Decoder;
 import org.apache.commons.codec.DecoderException;
 
-import com.thunisoft.mediax.core.amf.AMF0Decoder;
-import com.thunisoft.mediax.core.amf.AMFArray;
+import com.thunisoft.mediax.core.codec.amf.AMF0Decoder;
+import com.thunisoft.mediax.core.codec.amf.AMFArray;
+import com.thunisoft.mediax.core.codec.flv.FlvMetaData;
 import com.thunisoft.mediax.core.pseudostreaming.AbstractStreamer;
 import com.thunisoft.mediax.core.utils.ByteUtils;
 import com.thunisoft.mediax.core.vfs.RandomAccessChannel;

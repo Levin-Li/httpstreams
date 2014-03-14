@@ -1,26 +1,14 @@
-<%@ page language="java" import="java.util.*" pageEncoding="ISO-8859-1"%>
-<%
-String path = request.getContextPath();
-String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
-%>
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
-  <head>
-    <base href="<%=basePath%>">
-    
-    <title>My JSP 'index.jsp' starting page</title>
-	<meta http-equiv="pragma" content="no-cache">
-	<meta http-equiv="cache-control" content="no-cache">
-	<meta http-equiv="expires" content="0">    
-	<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
-	<meta http-equiv="description" content="This is my page">
-	<!--
-	<link rel="stylesheet" type="text/css" href="styles.css">
-	-->
-  </head>
-  
-  <body>
-    This is my JSP page. <br>
-  </body>
+<head>
+<title>HTTP流媒体服务器 V1.0</title>
+</head>
+
+<body><h5>统一音视频平台——HTTP流媒体服务器 V1.0</h5>
+
+1、普通点播：默认拦截 web 目录下的  MP4、flv 文件。
+2、作为代理服务器，视频地址格式为： 'http://localhost:8080/streamer/' + encodeURI("http://localhost:8080/streamer/flv/kuiba-0001.flv") 
+</body>
 </html>
