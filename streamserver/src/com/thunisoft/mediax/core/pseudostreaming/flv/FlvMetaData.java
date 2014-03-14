@@ -4,8 +4,8 @@ import java.sql.Timestamp;
 
 import org.apache.commons.lang.ArrayUtils;
 
-import com.thunisoft.mediax.core.amf.AMFArray;
-import com.thunisoft.mediax.core.amf.AMFObject;
+import com.thunisoft.mediax.core.codec.amf.AMFArray;
+import com.thunisoft.mediax.core.codec.amf.AMFObject;
 
 public class FlvMetaData {
 
