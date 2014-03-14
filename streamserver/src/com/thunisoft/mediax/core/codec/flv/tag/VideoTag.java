@@ -2,6 +2,8 @@ package com.thunisoft.mediax.core.codec.flv.tag;
 
 import org.apache.commons.lang.time.DateFormatUtils;
 
+import com.thunisoft.mediax.core.codec.flv.FlvConsts;
+
 
 
 public class VideoTag extends AbstractFrameTag {
@@ -10,11 +12,11 @@ public class VideoTag extends AbstractFrameTag {
     private int codecId;
 
     public VideoTag() {
-        super(Tag.VIDEO);
+        super(FlvConsts.TAGTYPE_VIDEO);
     }
 
     public VideoTag(long dataSize, long timestamp, long streamId) {
-        super(Tag.VIDEO, dataSize, timestamp, streamId);
+        super(FlvConsts.TAGTYPE_VIDEO, dataSize, timestamp, streamId);
     }
 
     public int getFrameType() {

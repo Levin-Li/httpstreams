@@ -45,18 +45,28 @@ public class TagDecoder implements Decoder {
         int tagType = typeOf(frameTag);
 
         switch (tagType) {
-            case Tag.VIDEO:
+            case FlvConsts.TAGTYPE_VIDEO:
                 return decodeVideoTag(frameTag);
-            case Tag.AUDIO:
+            case FlvConsts.TAGTYPE_AUDIO:
                 return decodeAudioTag(frameTag);
-            case Tag.SCRIPT:
+            case FlvConsts.TAGTYPE_SCRIPT:
                 return decodeMetadata(frameTag);
             default:
                 throw new DecoderException("unsupport tag type [" + tagType + "]");
         }
     }
 
-    private int typeOf(ByteBuffer tag) {
+    /**
+     * 
+     * @param tag
+     * @return
+     * @since V1.0 2014-3-14
+     * @author chenxh
+     * @see FlvConsts#TAGTYPE_AUDIO
+     * @see FlvConsts#TAGTYPE_VIDEO
+     * @see FlvConsts#TAGTYPE_SCRIPT
+     */
+    public int typeOf(ByteBuffer tag) {
         int position = tag.position();
 
         try {
@@ -129,7 +139,7 @@ public class TagDecoder implements Decoder {
     }
 
     public MetaDataTag decodeMetadata(ByteBuffer scriptData) throws DecoderException {
-        scriptData.position(FlvConsts.TAG_HEAD_LENGTH);
+        scriptData.position(FlvConsts.TAGHEAD_LENGTH);
 
         Object[] items = new AMF0Decoder().decode(scriptData);
         if (items.length < 2 || !"onMetaData".equals(items[0])) {

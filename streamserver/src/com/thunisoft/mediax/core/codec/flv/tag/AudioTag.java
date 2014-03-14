@@ -2,6 +2,8 @@ package com.thunisoft.mediax.core.codec.flv.tag;
 
 import org.apache.commons.lang.time.DateFormatUtils;
 
+import com.thunisoft.mediax.core.codec.flv.FlvConsts;
+
 public class AudioTag extends AbstractFrameTag implements Tag {
     /**
      * UB[4]
@@ -47,7 +49,7 @@ public class AudioTag extends AbstractFrameTag implements Tag {
     private int soundType;
 
     public AudioTag() {
-        super(Tag.AUDIO);
+        super(FlvConsts.TAGTYPE_AUDIO);
     }
 
     public AudioTag(int type, long dataSize, long timestamp, long streamId) {

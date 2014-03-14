@@ -20,7 +20,7 @@ public class FlvIterator implements Iterator<ByteBuffer>, Closeable {
     final private ByteBuffer fileHead;
     
     final private ByteBuffer preTagSize = ByteBuffer.allocate(4);
-    private ByteBuffer preTag = ByteBuffer.allocate(FlvConsts.TAG_HEAD_LENGTH);
+    private ByteBuffer preTag = ByteBuffer.allocate(FlvConsts.TAGHEAD_LENGTH);
 
     public FlvIterator(RandomAccessChannel ch) throws IOException {
         this.channel = ch;
@@ -36,7 +36,7 @@ public class FlvIterator implements Iterator<ByteBuffer>, Closeable {
     public boolean hasNext() {
         try {
             if (channel.isOpen()) {
-                return channel.position() + (FlvConsts.PRETAG_LENGTH + FlvConsts.TAG_HEAD_LENGTH) < channel
+                return channel.position() + (FlvConsts.PRETAG_LENGTH + FlvConsts.TAGHEAD_LENGTH) < channel
                                                                                        .length();
             } else {
                 return false;
@@ -97,21 +97,21 @@ public class FlvIterator implements Iterator<ByteBuffer>, Closeable {
     private ByteBuffer readTag(RandomAccessChannel ch) throws IOException {
         final long startPosition = ch.position();
         
-        if (preTag.capacity() < FlvConsts.TAG_HEAD_LENGTH) {
-            preTag = ByteBuffer.allocate(FlvConsts.TAG_HEAD_LENGTH);
+        if (preTag.capacity() < FlvConsts.TAGHEAD_LENGTH) {
+            preTag = ByteBuffer.allocate(FlvConsts.TAGHEAD_LENGTH);
         } else {
             preTag.clear();
         }
 
         // tag head
-        ByteBuffer tagHead =(ByteBuffer)preTag.limit(FlvConsts.TAG_HEAD_LENGTH);
+        ByteBuffer tagHead =(ByteBuffer)preTag.limit(FlvConsts.TAGHEAD_LENGTH);
         ch.read(tagHead);
         tagHead.flip();
         int type = ByteUtils.readUInt8(tagHead);
         int dataSize = ByteUtils.readUInt24(tagHead);
 
         // clear tag, tagSize = headsize + datasize
-        int tagSize = FlvConsts.TAG_HEAD_LENGTH + dataSize;
+        int tagSize = FlvConsts.TAGHEAD_LENGTH + dataSize;
         if (preTag.capacity() < tagSize) {
             preTag = ByteBuffer.allocate(tagSize);
         }
