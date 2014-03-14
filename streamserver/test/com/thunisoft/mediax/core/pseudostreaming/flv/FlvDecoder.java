@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.thunisoft.mediax.core.codec.amf.AMF0Decoder;
 import com.thunisoft.mediax.core.codec.amf.AMFArray;
+import com.thunisoft.mediax.core.codec.flv.FlvConsts;
 import com.thunisoft.mediax.core.codec.flv.tag.AudioTag;
 import com.thunisoft.mediax.core.codec.flv.tag.FlvHeader;
 import com.thunisoft.mediax.core.codec.flv.tag.MetaDataTag;
@@ -159,11 +160,11 @@ public class FlvDecoder implements Decoder {
 
 
         switch (tagType) {
-            case Tag.VIDEO:
+            case FlvConsts.TAGTYPE_VIDEO:
                 return decodeVideoTag(frameTag);
-            case Tag.AUDIO:
+            case FlvConsts.TAGTYPE_AUDIO:
                 return decodeAudioTag(frameTag);
-            case Tag.SCRIPT:
+            case FlvConsts.TAGTYPE_SCRIPT:
                 return decodeMetadata(frameTag);
             default:
                 throw new DecoderException("unsupport tag type [" + tagType + "]");
