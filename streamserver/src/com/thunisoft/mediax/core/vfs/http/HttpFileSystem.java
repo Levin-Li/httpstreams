@@ -127,15 +127,7 @@ public class HttpFileSystem implements FileSystem {
     }
 
     private Cache getCache() {
-        final String cacheKey = "HttpFileSystemCache";
-        Cache cache = VFS.getCacheManager().getCache(cacheKey);
-
-        if (null == cache) {
-            VFS.getCacheManager().addCache(cacheKey);
-            cache = VFS.getCacheManager().getCache(cacheKey);
-        }
-
-        return cache;
+        return VFS.getCache(HttpFileSystem.class);
     }
 
     private Key buildKey(HttpFileObject file, HttpRange range) {

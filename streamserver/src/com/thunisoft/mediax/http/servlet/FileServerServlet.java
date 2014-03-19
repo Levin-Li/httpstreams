@@ -49,6 +49,7 @@ public class FileServerServlet extends HttpServlet {
         }
         
         VFS.set(cacheManager);
+        VFS.setLocalRoot(getServletContext().getRealPath("/"));
     }
     
     @Override
@@ -176,11 +177,8 @@ public class FileServerServlet extends HttpServlet {
         String contextPath = req.getContextPath();
         String uri = req.getRequestURI().substring(contextPath.length());
         String url;
-        if (!uri.startsWith("/http")) {
-            url = new File(getServletContext().getRealPath(uri)).toURI().toString();
-        } else {
-            url = uri.substring(1);
-        }
+        
+        url = uri.substring(1);
         return url;
     }
 
