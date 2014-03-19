@@ -26,12 +26,14 @@ public class FlvIterator implements Iterator<ByteBuffer>, Closeable {
         this.channel = ch;
 
         this.fileHead = readFileHeader(ch);
+        readTagSize(ch);
     }
     
     public FlvIterator(File file) throws IOException {
         this(new RandomAccessFileChannelImpl(file));
     }
 
+    
     @Override
     public boolean hasNext() {
         try {
@@ -49,13 +51,14 @@ public class FlvIterator implements Iterator<ByteBuffer>, Closeable {
     @Override
     public ByteBuffer next() {
         try {
-            int preSize = preTagSize(channel);
-            logger.debug("preTagSize: {}", preSize);
 
             // next data
-            logger.debug("tagPosition: {}", channel.position());
+            long position = channel.position();
             ByteBuffer tagData = readTag(channel);
 
+            // tag size
+            int preSize = readTagSize(channel);
+            logger.debug("start: {}, tagSize: {}", position, preSize);
             return tagData;
         } catch (IOException e) {
             throw new IllegalStateException(e.getMessage(), e);
@@ -63,6 +66,13 @@ public class FlvIterator implements Iterator<ByteBuffer>, Closeable {
     }
 
 
+    public void back() throws IOException {
+        channel.position(position() - 4);
+        int preSize = readTagSize(channel);
+        
+        channel.position(position() - 4 - preSize);
+    }
+    
     private ByteBuffer readFileHeader(RandomAccessChannel ch) throws IOException {
         long startPosition = ch.position();
 
@@ -89,7 +99,7 @@ public class FlvIterator implements Iterator<ByteBuffer>, Closeable {
     }
 
 
-    private int preTagSize(RandomAccessChannel ch) throws IOException {
+    private int readTagSize(RandomAccessChannel ch) throws IOException {
         ByteBuffer data = clearAndReadFull(ch, preTagSize, preTagSize.capacity());
         return data.getInt();
     }
@@ -109,6 +119,9 @@ public class FlvIterator implements Iterator<ByteBuffer>, Closeable {
         tagHead.flip();
         int type = ByteUtils.readUInt8(tagHead);
         int dataSize = ByteUtils.readUInt24(tagHead);
+        long timestamp = ByteUtils.readUInt32(tagHead);
+        int streamId = ByteUtils.readUInt24(tagHead);
+        logger.debug("type: {}, datasize: {}, timestamp: {}s, streamId: {}", new Object[]{type, dataSize, timestamp/1000, streamId});
 
         // clear tag, tagSize = headsize + datasize
         int tagSize = FlvConsts.TAGHEAD_LENGTH + dataSize;
@@ -140,6 +153,13 @@ public class FlvIterator implements Iterator<ByteBuffer>, Closeable {
         return fileHead;
     }
     
+    public long position() throws IOException {
+        return channel.position();
+    }
+    
+    public void position(long position) throws IOException {
+        channel.position(position);
+    }
     @Override
     public void close() throws IOException {
         channel.close();

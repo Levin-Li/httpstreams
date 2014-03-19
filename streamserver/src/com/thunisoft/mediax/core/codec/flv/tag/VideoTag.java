@@ -35,6 +35,10 @@ public class VideoTag extends AbstractFrameTag {
         this.codecId = codecId;
     }
 
+    public boolean isKey() {
+        return 1 == frameType;
+    }
+
     public String getFrameDescript() {
         String descript;
         switch (this.frameType) {

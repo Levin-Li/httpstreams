@@ -8,5 +8,14 @@ public class MetaDataTag extends FlvMetaData implements Tag {
     public MetaDataTag(AMFArray metadata) {
         super(metadata);
     }
+    
+    @Override
+    public boolean isKey() {
+        return false;
+    }
 
+    @Override
+    public long getTimestamp() {
+        return 0;
+    }
 }

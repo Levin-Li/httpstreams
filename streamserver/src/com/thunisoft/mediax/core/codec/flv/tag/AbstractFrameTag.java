@@ -52,6 +52,13 @@ public abstract class AbstractFrameTag implements Tag {
         this.dataSize = dataSize;
     }
 
+    
+    @Override
+    public boolean isKey() {
+        return false;
+    }
+
+    
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder();

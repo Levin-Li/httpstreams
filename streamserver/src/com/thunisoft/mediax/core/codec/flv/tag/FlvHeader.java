@@ -9,7 +9,7 @@ public class FlvHeader implements Tag {
     private boolean hasAudio;
 
     private ByteBuffer tag;
-    
+
     public FlvHeader(int version, boolean hasVideo, boolean hasAudio, ByteBuffer tag) {
         super();
         this.version = version;
@@ -49,6 +49,15 @@ public class FlvHeader implements Tag {
     public ByteBuffer getTag() {
         return tag;
     }
-    
+
+    @Override
+    public boolean isKey() {
+        return false;
+    }
+
+    @Override
+    public long getTimestamp() {
+        return 0;
+    }
 
 }
