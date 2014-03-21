@@ -1,0 +1,131 @@
+
+
+
+
+
+<!doctype html>
+<html>
+<head>
+    
+    <title>Tube Skin : Flowplayer</title>
+
+    <link rel="shortcut icon" href="http://flash.flowplayer.org/favicon.ico">
+    <!-- standalone page styling. can be removed -->
+    <style>
+        body{
+            width:982px;
+            margin:50px auto;
+            font-family:sans-serif;
+        }
+        a:active {
+            outline:none;
+        }
+        :focus { -moz-outline-style:none; }
+
+        .palert {
+            padding: 12px;
+            color: black;
+            background-color: #ededed;
+            box-shadow: none;
+        }
+    </style>
+
+    
+    
+    <!-- flowplayer javascript component -->
+    <script src="http://releases.flowplayer.org/js/flowplayer-3.2.13.min.js"></script>
+
+    </head>
+
+<body>
+    <!-- player container-->
+<div class="player" id="player"
+	style="display: block; width: 600px; height: 400px; margin: 10px auto">
+</div>
+<script>
+flowplayer("player", "/flowplayer/flash/flowplayer.commercial-3.2.18.swf", {
+	// commercial version license key
+    key: '#$7162d2d730cf607ac6d',
+    
+    enableByteRange:true,
+    
+
+    clip: {
+        autoPlay: true,
+        url:'http://chenxh.thunisoft.com:8080/flv/kuiba/kuiba-0001.flv',
+        provider: 'pseudo'
+    },
+
+    // change the default controlbar to tube
+    plugins: {
+        pseudo: {
+            url: "/flowplayer/flash/flowplayer.pseudostreaming-3.2.11.swf",
+			autoPlay:true,
+			autoBuffering:true
+        },
+        /**
+        hls: {
+            url: "/flowplayer/flash/HLSProviderFlowPlayer.swf",
+			autoPlay:true,
+			autoBuffering:true
+        },*/
+
+		controls: {
+	        url: '/flowplayer/flash/flowplayer.controls-3.2.16.swf',
+	        // customize the appearance make it have a lighter look
+	        buttonColor: 'rgba(0, 0, 0, 0.9)',
+	        buttonOverColor: '#000000',
+	        backgroundColor: '#D7D7D7',
+	        backgroundGradient: 'medium',
+	        sliderColor: '#FFFFFF',
+	        sliderBorder: '1px solid #808080',
+	        volumeSliderColor: '#FFFFFF',
+	        volumeBorder: '1px solid #808080',
+	
+	        timeColor: '#000000',
+	        durationColor: '#535353',
+	        
+	        autoHide: {
+	           enabled:false,
+	           fullscreenOnly:true
+	        },
+	        
+	        height: 30,
+	        playlist: true,
+	     
+	        // background color for tooltips
+	        tooltipColor: '#456',
+	     
+	        // which tooltips are shown and which are not?
+	        tooltips:  {
+	            // a shortcut for enabling tooltips for buttons (English)
+	            buttons: true,
+	     
+	            // customize the pause button text
+	            pause: 'Continue playing',
+	     
+	            // disable tooltips for the volume control
+	            volume: true
+	        }
+	    }
+    },
+	
+    /* http + flv
+    */
+    /* http + flv
+    clip: {
+        autoPlay: true,
+        url:'http://chenxh.thunisoft.com:8080/flv/kuiba.m3u8',
+        provider: 'hls'
+    },
+    */
+    log: {
+        level: 'debug',
+        filter: 'org.flowplayer.m3u8.*,org.flowplayer.pseudostreaming.*'
+    }
+    
+});
+</script>
+</body>
+
+</html>
