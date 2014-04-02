@@ -23,6 +23,7 @@ public class FlvMetaData {
     public static final String P_KEYFRAMES = "keyframes";
     public static final String P_HAS_KEYFRAMES = "hasKeyframes";
     public static final String P_METADATA_CREATOR = "metadatacreator";
+    public static final String P_VIDEO_CODEC_ID = "videocodecid";
 
     private AMFArray metadata;
 

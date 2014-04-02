@@ -13,6 +13,7 @@ import com.thunisoft.mediax.core.codec.flv.tag.FlvHeader;
 import com.thunisoft.mediax.core.codec.flv.tag.MetaDataTag;
 import com.thunisoft.mediax.core.codec.flv.tag.Tag;
 import com.thunisoft.mediax.core.codec.flv.tag.VideoTag;
+import com.thunisoft.mediax.core.pseudostreaming.flv.h264.AvcPacketDecoder;
 import com.thunisoft.mediax.core.utils.ByteUtils;
 
 public class TagDecoder implements Decoder {
@@ -80,7 +81,8 @@ public class TagDecoder implements Decoder {
         // tag head
         int type = ByteUtils.readUInt8(bytes);
         int dataSize = ByteUtils.readUInt24(bytes);
-        long timestamp = ByteUtils.readUInt32(bytes);
+        long timestamp = ByteUtils.readUInt24(bytes);
+        timestamp |= ByteUtils.readUInt8(bytes) << 24;
         int streamId = ByteUtils.readUInt24(bytes);
 
         // tag data
@@ -108,7 +110,8 @@ public class TagDecoder implements Decoder {
         // tag head
         int type = ByteUtils.readUInt8(bytes);
         int dataSize = ByteUtils.readUInt24(bytes);
-        long timestamp = ByteUtils.readUInt32(bytes);
+        long timestamp = ByteUtils.readUInt24(bytes);
+        timestamp |= ByteUtils.readUInt8(bytes) << 24;
         int streamId = ByteUtils.readUInt24(bytes);
 
         // tag data
@@ -135,6 +138,8 @@ public class TagDecoder implements Decoder {
         tag.setStreamId(streamId);
         tag.setFrameType(frameType);
         tag.setCodecId(codeId);
+        
+        new AvcPacketDecoder().decode(bytes);
         return tag;
     }
 
