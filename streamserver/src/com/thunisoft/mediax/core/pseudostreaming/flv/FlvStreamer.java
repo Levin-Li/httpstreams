@@ -60,9 +60,12 @@ public class FlvStreamer extends AbstractStreamer {
 
         // flv data
         ByteBuffer scriptData = flvIterator.next(); // first data tag
-        long position = decodeMetadata(scriptData).getNearestPosition((long) startAt);
+        FlvMetaData metadata = decodeMetadata(scriptData);
+        long position = metadata.getNearestPosition((long) startAt);
 
-        channel.transferTo(position, channel.length() - position, outChannel);
+        if (position > 0) {
+            channel.transferTo(position, channel.length() - position, outChannel);
+        }
     }
 
     private FlvMetaData decodeMetadata(ByteBuffer scriptData) throws IOException {
