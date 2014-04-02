@@ -75,6 +75,8 @@ public class FileServerServlet extends HttpServlet {
             }
         } catch (Exception e) {
             logger.warn(e.getMessage(), e);
+        } finally {
+            resp.flushBuffer();
         }
     }
 
@@ -116,6 +118,7 @@ public class FileServerServlet extends HttpServlet {
         String range = req.getHeader(HttpHeaders.Names.RANGE);
         if (!StringUtils.isEmpty(range)) {
             HttpRange httpRange = HttpRange.parse(range, file.length());
+            logger.debug("{}", httpRange);
             status = HttpServletResponse.SC_PARTIAL_CONTENT;
             contentType = "multipart/byteranges";
             contentLength = ByteUtils.long2Int(httpRange.length());
@@ -133,6 +136,8 @@ public class FileServerServlet extends HttpServlet {
         resp.setStatus(status);
         resp.setContentType(contentType);
         resp.setHeader(HttpHeaders.Names.CONTENT_LENGTH, String.valueOf(contentLength));
+        resp.setDateHeader(HttpHeaders.Names.LAST_MODIFIED, file.lastModified());
+       
         return status;
     }
 
