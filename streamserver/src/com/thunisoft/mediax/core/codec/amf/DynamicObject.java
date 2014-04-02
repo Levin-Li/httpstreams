@@ -40,7 +40,19 @@ class DynamicObject implements Iterable<Entry>, Serializable {
 
     
     public Object put(String name, Object value) {
-        Object oldValue = get(name);
+        Object oldValue = null;
+
+        
+        for (Entry entry : entries) {
+            String entryName = entry.getName();
+            if (null != entryName && entryName.equals(name)) {
+                oldValue = entry.getValue();
+
+                entries.remove(entry); // delete old
+                break;
+            }
+        }
+        
         entries.add(new Entry(name, value));
         
         return oldValue;
