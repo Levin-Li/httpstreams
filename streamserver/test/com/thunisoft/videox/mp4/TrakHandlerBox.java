@@ -10,7 +10,7 @@ public class TrakHandlerBox extends FullBox {
     final public static String CONTAINER = "moov.trak.mdia";
     final public static String TYPE = "hdlr";
 
-    final public static String HANDLER_AUDIO = "soud";
+    final public static String HANDLER_AUDIO = "soun";
     final public static String HANDLER_VIDEO = "vide";
     final public static String HANDLER_HINT = "hint";
     
