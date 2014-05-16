@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<taglib xmlns="http://java.sun.com/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-jsptaglibrary_2_1.xsd"
+    version="2.1">
+    
+  <description>JSTL 1.1 core library</description>
+  <display-name>JSTL core</display-name>
+  <tlib-version>1.1</tlib-version>
+  <short-name>u</short-name>
+  <uri>http://www.thunisoft.com/sphj/common-utils</uri>
+
+  <validator>
+    <description>
+        Provides core validation features for JSTL tags.
+    </description>
+    <validator-class>
+        org.apache.taglibs.standard.tlv.JstlCoreTLV
+    </validator-class>
+  </validator>
+
+  <tag>
+    <description>
+        output current corp name.
+    </description>
+    <name>outCorpName</name>
+    <tag-class>com.thunisoft.sphy.taglibs.CorpNameOutTag</tag-class>
+    <body-content>JSP</body-content>
+  </tag>
+
+
+</taglib>

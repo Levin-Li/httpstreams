@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+http://www.springframework.org/schema/context 
+http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+	<!-- 将多个配置文件读取到容器中，交给Spring管理 -->
+	<bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<!-- 这里支持多种寻址方式：classpath和file -->
+				<value>classpath:/props/config.properties</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+		destroy-method="close">
+		<property name="driverClass">
+			<value>${dataSource.driverClass}</value>
+		</property>
+		<property name="jdbcUrl">
+			<value>${dataSource.jdbcUrl}</value>
+		</property>
+		<property name="user">
+			<value>${dataSource.user}</value>
+		</property>
+		<property name="password">
+			<value>${dataSource.password}</value>
+		</property>
+		<!--当连接池中的连接耗尽的时候c3p0一次同时获取的连接数。Default: 3 -->
+		<property name="acquireIncrement">
+			<value>${dataSource.acquireIncrement}</value>
+		</property>
+		<!--初始化时获取三个连接，取值应在minPoolSize与maxPoolSize之间。Default: 3 -->
+		<property name="initialPoolSize">
+			<value>${dataSource.initialPoolSize}</value>
+		</property>
+		<!--连接池中保留的最大连接数。Default: 15 -->
+		<property name="maxPoolSize">
+			<value>${dataSource.maxPoolSize}</value>
+		</property>
+		<!--连接池中保留的最小连接数。 -->
+		<property name="minPoolSize">
+			<value>${dataSource.minPoolSize}</value>
+		</property>
+		<!--定期测试连接可用性。 -->
+		<property name="idleConnectionTestPeriod">
+			<value>3600</value>
+		</property>
+	</bean>
+
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+		<property name="dataSource">
+			<ref bean="dataSource" />
+		</property>
+		<property name="useTransactionAwareDataSource">
+			<value>true</value>
+		</property>
+		<property name="mappingDirectoryLocations">
+			<list>
+				<value>classpath:/com/thunisoft/sphy/hibernate/</value>
+			</list>
+		</property>
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">${hibernate.dialect}</prop>
+				<prop key="hibernate.connection.autocommit">${hibernate.connection.autocommit}</prop>
+				<prop key="hibernate.show_sql">${hibernate.show_sql}</prop>
+			</props>
+		</property>
+	</bean>
+
+	<!-- sms -->
+	<bean id="sms.ClientLoginAction" class="com.thunisoft.sphy.sms.action.ClientLoginAction"
+		scope="prototype">
+
+	</bean>
+	<bean id="sms.GetMessageAction" class="com.thunisoft.sphy.sms.action.GetMessageAction"
+		scope="prototype">
+
+	</bean>
+	<bean id="meet.GotoMeetingAction" class="com.thunisoft.sphy.sms.action.GetMessageAction"
+		scope="prototype">
+
+	</bean>
+
+	<bean id="xfxsService" class="com.thunisoft.sphy.xfxs.service.XfxsService">
+		<property name="xfxsDao">
+			<bean class="com.thunisoft.sphy.xfxs.dao.XfxsDao">
+				<property name="sessionFactory" ref="sessionFactory"></property>
+			</bean>
+		</property>
+	</bean>
+	
+
+	<bean id="xfxs.IndexAction" class="com.thunisoft.sphy.xfxs.action.IndexAction"
+		scope="prototype">
+	</bean>
+	<bean id="xfxs.MakeAppointAction" class="com.thunisoft.sphy.xfxs.action.MakeAnAppointmentAction"
+		scope="prototype">
+		<property name="xfxsService" ref="xfxsService"></property>
+	</bean>
+	<bean id="xfxs.AppointStateQueryAction" class="com.thunisoft.sphy.xfxs.action.AppointStateQueryAction"
+		scope="prototype">
+		<property name="xfxsService" ref="xfxsService"></property>
+	</bean>
+	
+	<bean id="xfxs.AppointCodeLoginAction" class="com.thunisoft.sphy.xfxs.action.AppointCodeLoginAction"
+		scope="prototype">
+		<property name="xfxsService" ref="xfxsService"></property>
+	</bean>
+	
+	
+	<bean id="auth.AuthCodeLoginAction" class="com.thunisoft.sphy.auth.AuthCodeLoginAction"
+		scope="prototype">
+	</bean>
+</beans>
